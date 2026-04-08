@@ -1,5 +1,8 @@
 package com.example.ticketRush.UserModule.Entity;
 
+import com.example.ticketRush.BookingModule.Entity.Booking;
+import com.example.ticketRush.EventModule.Entity.Seat;
+import com.example.ticketRush.PaymentModule.Entity.PaymentTransaction;
 import com.example.ticketRush.UserModule.Enum.Role;
 import com.example.ticketRush.UserModule.Enum.UserStatus;
 import jakarta.persistence.*;
@@ -9,6 +12,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -55,4 +60,16 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    // 1 User -> N Bookings
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Booking> bookings = new ArrayList<>();
+
+    // 1 User -> N Payment Transactions
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<PaymentTransaction> paymentTransactions = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Seat> seats = new ArrayList<>();
 }
