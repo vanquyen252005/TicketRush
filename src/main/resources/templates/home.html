@@ -8,7 +8,9 @@
 <body>
 <h2>Home</h2>
 <p>Bạn đã đăng nhập thành công.</p>
-<p><a th:href="@{/logout}">Logout</a></p>
+<form th:action="@{/logout}" method="post">
+    <button type="submit" class="btn-logout">Đăng xuất</button>
+</form>
 </body>
 </html>
 
