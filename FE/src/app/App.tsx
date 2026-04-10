@@ -1,13 +1,12 @@
-import { RouterProvider } from "react-router";
-import { CustomerAuthProvider } from "./context/CustomerAuthContext";
-import { router } from "./routes";
-import { Toaster } from "sonner";
+import { RouterProvider } from 'react-router';
+import { router } from './routes';
+import { Toaster } from 'sonner';
 
 export default function App() {
   return (
-    <CustomerAuthProvider>
+    <>
+      <Toaster position="top-right" richColors />
       <RouterProvider router={router} />
-      <Toaster position="top-right" />
-    </CustomerAuthProvider>
+    </>
   );
 }
