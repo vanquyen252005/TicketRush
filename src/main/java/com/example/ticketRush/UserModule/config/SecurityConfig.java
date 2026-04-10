@@ -30,9 +30,23 @@ public class SecurityConfig {
         handler.setPostLogoutRedirectUri("{baseUrl}/login");
 
         http
-                .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/login", "/logout", "/error", "/css/**", "/js/**", "/images/**").permitAll()
+                .authorizeHttpRequests(auth -> auth
+                        // Public pages – không cần đăng nhập
+                        .requestMatchers(
+                                "/login", "/logout", "/error",
+                                "/css/**", "/js/**", "/images/**",
+                                "/favicon.ico"
+                        ).permitAll()
+                        // OAuth2 flow
                         .requestMatchers("/oauth2/**").permitAll()
+                        // ── Swagger / OpenAPI ──────────────────────────────
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml"
+                        ).permitAll()
+                        // ── Admin area ─────────────────────────────────────
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
