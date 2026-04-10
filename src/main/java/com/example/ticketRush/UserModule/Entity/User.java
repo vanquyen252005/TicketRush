@@ -31,8 +31,11 @@ public class User {
     @Column(unique = true, nullable = false, length = 100)
     private String email;
 
-    @Column(nullable = false)
-    private String password; // Đã mã hóa BCrypt
+    @Column(unique = true, length = 50)
+    private String username;
+
+    @Column
+    private String password; // BCrypt cho user nội bộ; OAuth2 có thể null
 
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;

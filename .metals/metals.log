@@ -1,0 +1,43 @@
+2026.04.09 15:38:13 INFO  Started: Metals version 1.6.7 in folders '/home/vanquyen/repos/development/TicketRush' for client Cursor 1.105.1.
+2026.04.09 15:38:13 INFO  Memory monitor started
+2026.04.09 15:38:13 WARN  Using H2 2.4.240 which is newer than the version Flyway has been verified with. The latest verified version of H2 is 2.3.232.
+2026.04.09 15:38:13 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/AppConfig.java. Using fallback presentation compiler.
+2026.04.09 15:42:10 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/AppConfig.java. Using fallback presentation compiler.
+2026.04.09 15:42:38 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/DatabaseUserDetailsService.java. Using fallback presentation compiler.
+2026.04.09 15:44:33 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.09 15:44:39 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.09 16:55:17 INFO  Shutting down server
+2026.04.09 16:55:17 INFO  Memory monitor stopped
+2026.04.09 16:55:17 INFO  shutting down Metals
+2026.04.09 16:55:17 INFO  Exiting server
+2026.04.09 16:55:17 ERROR Unexpected error initializing server: 
+org.eclipse.lsp4j.jsonrpc.ResponseErrorException: Request window/showMessageRequest failed with message: Canceled
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.handleResponse(RemoteEndpoint.java:214)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.consume(RemoteEndpoint.java:198)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.handleMessage(StreamMessageProducer.java:189)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.listen(StreamMessageProducer.java:97)
+	at org.eclipse.lsp4j.jsonrpc.json.ConcurrentMessageProcessor.run(ConcurrentMessageProcessor.java:97)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.lang.Thread.run(Thread.java:1583)
+
+2026.04.09 20:24:38 INFO  Started: Metals version 1.6.7 in folders '/home/vanquyen/repos/development/TicketRush' for client Cursor 1.105.1.
+2026.04.09 20:24:38 INFO  Memory monitor started
+2026.04.09 20:24:39 WARN  Using H2 2.4.240 which is newer than the version Flyway has been verified with. The latest verified version of H2 is 2.3.232.
+Apr 09, 2026 8:24:41 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 7
+2026.04.09 20:24:41 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/AppConfig.java. Using fallback presentation compiler.
+2026.04.09 20:24:43 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/AppConfig.java. Using fallback presentation compiler.
+2026.04.09 20:24:44 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/AppConfig.java. Using fallback presentation compiler.
+2026.04.09 20:35:28 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/AppConfig.java. Using fallback presentation compiler.
+2026.04.09 20:35:44 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/AppConfig.java. Using fallback presentation compiler.
+2026.04.09 20:35:44 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/AppConfig.java. Using fallback presentation compiler.
+2026.04.09 20:35:46 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/AppConfig.java. Using fallback presentation compiler.
+2026.04.09 20:51:22 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.09 20:51:22 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthDebugController.java. Using fallback presentation compiler.
+2026.04.09 20:52:58 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/SecurityConfig.java. Using fallback presentation compiler.
+2026.04.09 20:53:00 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/SecurityConfig.java. Using fallback presentation compiler.
+2026.04.09 20:53:09 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/SecurityConfig.java. Using fallback presentation compiler.
+2026.04.09 20:53:09 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthPageController.java. Using fallback presentation compiler.
