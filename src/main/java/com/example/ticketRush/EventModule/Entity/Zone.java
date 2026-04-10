@@ -11,7 +11,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "zones")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Zone {
 
     @Id

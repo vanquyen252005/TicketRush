@@ -1,4 +1,7 @@
 package com.example.ticketRush.EventModule.Repository;
 
-public interface EventRepository {
+import com.example.ticketRush.EventModule.Entity.Event;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface EventRepository extends JpaRepository<Event, Long> {
 }

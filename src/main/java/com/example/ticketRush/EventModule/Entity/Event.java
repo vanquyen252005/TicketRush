@@ -13,7 +13,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "events")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Event {
 
     @Id
@@ -28,6 +32,9 @@ public class Event {
 
     @Column(nullable = false, length = 255)
     private String location;
+
+    @Column(name = "image_url", length = 1000)
+    private String imageUrl;
 
     @Column(name = "start_time", nullable = false)
     private LocalDateTime startTime;
