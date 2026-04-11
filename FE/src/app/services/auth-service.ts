@@ -2,11 +2,6 @@ import { apiFetch, API_BASE_URL } from "../api-client";
 
 // ─── Types ───────────────────────────────────────────────────────────────
 
-export interface LoginData {
-  identifier: string;
-  password: string;
-}
-
 export interface RegisterData {
   fullName: string;
   email: string;
@@ -46,19 +41,14 @@ function clearTokens() {
 
 // ─── Auth Service ────────────────────────────────────────────────────────
 
-export const authService = {
-  /**
-   * Đăng nhập bằng username/email + password qua Keycloak ROPC.
-   */
-  login: async (data: LoginData): Promise<AuthResponse> => {
-    const response = await apiFetch<AuthResponse>("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-    saveTokens(response);
-    return response;
-  },
+export interface MeResponse {
+  authenticated: boolean;
+  name: string;
+  authorities: string[];
+  user: UserInfo;
+}
 
+export const authService = {
   /**
    * Đăng ký tài khoản mới.
    */
@@ -70,8 +60,8 @@ export const authService = {
   },
 
   /**
-   * Đăng nhập bằng Keycloak OAuth2 (redirect-based).
-   * Redirect trực tiếp tới backend OAuth2 endpoint.
+   * Đăng nhập Keycloak qua OAuth2/OIDC (authorization code).
+   * Backend dùng CustomOidcUserService khi nhận callback từ Keycloak.
    */
   loginWithKeycloak: () => {
     window.location.href = `${API_BASE_URL}/oauth2/authorization/ticketRush`;
@@ -104,13 +94,9 @@ export const authService = {
   },
 
   /**
-   * Lấy thông tin user hiện tại từ server.
+   * Lấy thông tin user hiện tại từ server (JWT Bearer).
    */
-  getMe: async (): Promise<{
-    authenticated: boolean;
-    name: string;
-    authorities: string[];
-  }> => {
+  getMe: async (): Promise<MeResponse> => {
     return apiFetch("/api/auth/me");
   },
 

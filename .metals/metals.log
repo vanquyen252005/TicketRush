@@ -133,3 +133,352 @@ org.eclipse.lsp4j.jsonrpc.ResponseErrorException: Request window/showMessageRequ
 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
 	at java.lang.Thread.run(Thread.java:1583)
 
+2026.04.11 19:53:32 INFO  Started: Metals version 1.6.7 in folders '/home/vanquyen/repos/development/TicketRush' for client Visual Studio Code 1.115.0.
+2026.04.11 19:53:32 INFO  Memory monitor started
+2026.04.11 19:53:32 WARN  Using H2 2.4.240 which is newer than the version Flyway has been verified with. The latest verified version of H2 is 2.3.232.
+2026.04.11 19:53:39 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Dto/Request/LoginRequest.java. Using fallback presentation compiler.
+2026.04.11 19:53:39 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Dto/Request/LoginRequest.java. Using fallback presentation compiler.
+2026.04.11 19:54:57 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:54:57 WARN  no build target for: /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java
+Apr 11, 2026 7:54:57 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 2
+2026.04.11 19:54:57 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:54:58 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:54:57 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:54:58 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:54:57 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:55:05 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:55:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:55:06 INFO  Created report: Optional[file:///home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java]
+2026.04.11 19:55:06 INFO  empty definition using pc, found symbol in pc: _empty_/AuthResponse# (full report at: "/home/vanquyen/repos/development/TicketRush/.metals/.reports/metals-full/2026-04-11/r_empty-definition_19-55-06-503.md")
+2026.04.11 19:55:05 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:55:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:55:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:55:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:55:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:55:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 19:55:06 INFO  empty definition using pc, found symbol in pc: _empty_/AuthResponse# (full report at: "/home/vanquyen/repos/development/TicketRush/.metals/.reports/metals-full/2026-04-11/r_empty-definition_19-55-06-503.md")
+2026.04.11 19:55:07 INFO  empty definition using pc, found symbol in pc: _empty_/AuthResponse# (full report at: "/home/vanquyen/repos/development/TicketRush/.metals/.reports/metals-full/2026-04-11/r_empty-definition_19-55-06-503.md")
+2026.04.11 19:55:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Dto/Response/AuthResponse.java. Using fallback presentation compiler.
+2026.04.11 19:55:07 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Dto/Response/AuthResponse.java. Using fallback presentation compiler.
+2026.04.11 19:55:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Dto/Response/AuthResponse.java. Using fallback presentation compiler.
+2026.04.11 19:55:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Dto/Response/AuthResponse.java. Using fallback presentation compiler.
+2026.04.11 19:55:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Dto/Response/AuthResponse.java. Using fallback presentation compiler.
+2026.04.11 19:56:28 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Dto/Response/AuthResponse.java. Using fallback presentation compiler.
+2026.04.11 19:56:28 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:56:28 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:56:28 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:56:34 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 19:58:00 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:58:00 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:58:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:58:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:58:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 19:58:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 19:58:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 19:58:39 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 19:58:39 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 19:58:39 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 19:58:39 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 19:58:48 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 19:58:51 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 19:58:51 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:58:51 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+Apr 11, 2026 7:58:51 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 121
+2026.04.11 19:58:51 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:58:51 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:58:51 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:58:52 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 19:58:52 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:00:36 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:00:36 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:00:36 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:00:37 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:00:37 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:00:55 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:00:55 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:19 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:19 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:19 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:20 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:20 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:20 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:20 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+Apr 11, 2026 8:01:21 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 181
+2026.04.11 20:01:20 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:20 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+Apr 11, 2026 8:01:21 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 186
+2026.04.11 20:01:20 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:22 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:22 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:23 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:23 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:28 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:28 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:29 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:29 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:29 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:29 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:29 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+Apr 11, 2026 8:01:30 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 204
+2026.04.11 20:01:29 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:29 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:29 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:36 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:36 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:37 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:49 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:49 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:50 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:50 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:50 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:01:56 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:02:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:45 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:45 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:45 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:45 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:47 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:49 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:49 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:49 INFO  Created report: Optional[file:///home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java]
+2026.04.11 20:03:49 INFO  empty definition using pc, found symbol in pc: _empty_/RestTemplate# (full report at: "/home/vanquyen/repos/development/TicketRush/.metals/.reports/metals-full/2026-04-11/r_empty-definition_20-03-49-612.md")
+2026.04.11 20:03:49 INFO  Created report: Optional[file:///home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java]
+2026.04.11 20:03:49 INFO  empty definition using pc, found symbol in pc: _empty_/JwtDecoder# (full report at: "/home/vanquyen/repos/development/TicketRush/.metals/.reports/metals-full/2026-04-11/r_empty-definition_20-03-49-690.md")
+2026.04.11 20:03:49 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:49 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:49 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:49 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:03:49 INFO  empty definition using pc, found symbol in pc: _empty_/JwtDecoder# (full report at: "/home/vanquyen/repos/development/TicketRush/.metals/.reports/metals-full/2026-04-11/r_empty-definition_20-03-49-690.md")
+Apr 11, 2026 8:03:50 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleNotification
+WARNING: Notification threw an exception: {
+  "jsonrpc": "2.0",
+  "method": "metals/didFocusTextDocument",
+  "params": [
+    "jdt://contents/spring-security-oauth2-jose-7.0.4.jar/org.springframework.security.oauth2.jwt/JwtDecoder.java?%3DticketRush%2F%5C%2Fhome%5C%2Fvanquyen%5C%2F.m2%5C%2Frepository%5C%2Forg%5C%2Fspringframework%5C%2Fsecurity%5C%2Fspring-security-oauth2-jose%5C%2F7.0.4%5C%2Fspring-security-oauth2-jose-7.0.4.jar%3D%2Fmaven.pomderived%3D%2Ftrue%3D%2F%3D%2Fjavadoc_location%3D%2Fjar%3Afile%3A%5C%2Fhome%5C%2Fvanquyen%5C%2F.m2%5C%2Frepository%5C%2Forg%5C%2Fspringframework%5C%2Fsecurity%5C%2Fspring-security-oauth2-jose%5C%2F7.0.4%5C%2Fspring-security-oauth2-jose-7.0.4-javadoc.jar%5C%21%5C%2F%3D%2F%3D%2Fmaven.groupId%3D%2Forg.springframework.security%3D%2F%3D%2Fmaven.artifactId%3D%2Fspring-security-oauth2-jose%3D%2F%3D%2Fmaven.version%3D%2F7.0.4%3D%2F%3D%2Fmaven.scope%3D%2Fcompile%3D%2F%3D%2Fmaven.pomderived%3D%2Ftrue%3D%2F%3Corg.springframework.security.oauth2.jwt%28JwtDecoder.class"
+  ]
+}
+java.nio.file.FileSystemNotFoundException: Provider "jdt" not installed
+	at java.base/java.nio.file.Path.of(Path.java:213)
+	at java.base/java.nio.file.Paths.get(Paths.java:98)
+	at scala.meta.internal.mtags.MtagsEnrichments$XtensionURIMtags.toAbsolutePath(MtagsEnrichments.scala:149)
+	at scala.meta.internal.mtags.MtagsEnrichments$XtensionStringMtags.toAbsolutePath(MtagsEnrichments.scala:209)
+	at scala.meta.internal.metals.MetalsEnrichments$XtensionString.toAbsolutePath(MetalsEnrichments.scala:787)
+	at scala.meta.internal.metals.MetalsEnrichments$XtensionString.toAbsolutePath(MetalsEnrichments.scala:784)
+	at scala.meta.internal.metals.WorkspaceLspService.didFocus(WorkspaceLspService.scala:808)
+	at scala.meta.metals.lsp.DelegatingScalaService.didFocus(DelegatingScalaService.scala:42)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.lambda$recursiveFindRpcMethods$0(GenericEndpoint.java:65)
+	at org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint.notify(GenericEndpoint.java:160)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.handleNotification(RemoteEndpoint.java:225)
+	at org.eclipse.lsp4j.jsonrpc.RemoteEndpoint.consume(RemoteEndpoint.java:192)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.handleMessage(StreamMessageProducer.java:189)
+	at org.eclipse.lsp4j.jsonrpc.json.StreamMessageProducer.listen(StreamMessageProducer.java:97)
+	at org.eclipse.lsp4j.jsonrpc.json.ConcurrentMessageProcessor.run(ConcurrentMessageProcessor.java:97)
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+2026.04.11 20:04:02 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:02 WARN  no build target for: /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java
+2026.04.11 20:04:02 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:02 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:02 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:04 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:04 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:05 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:06 INFO  empty definition using pc, found symbol in pc: _empty_/JwtDecoder# (full report at: "/home/vanquyen/repos/development/TicketRush/.metals/.reports/metals-full/2026-04-11/r_empty-definition_20-03-49-690.md")
+2026.04.11 20:04:08 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:23 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:23 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:26 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:26 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:28 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:28 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:28 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:40 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:41 WARN  no build target for: /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java
+2026.04.11 20:04:41 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:40 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:41 WARN  no build target for: /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java
+2026.04.11 20:04:41 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:43 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:43 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:45 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:04:48 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:05:19 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 20:05:19 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 20:05:19 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 20:05:19 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 20:05:19 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 20:05:19 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 20:05:22 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 20:05:22 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 20:07:21 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/UserServiceImpl.java. Using fallback presentation compiler.
+2026.04.11 20:07:22 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:07:22 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:07:22 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:07:22 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:07:22 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:07:23 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:07:23 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:11:33 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:11:34 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:11:34 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:12:55 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:12:55 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:13:48 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:14:51 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:14:52 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:14:52 WARN  no build target for: /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java
+2026.04.11 20:14:52 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:14:52 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:14:52 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:14:52 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:14:52 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:16:23 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:18:34 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:19:05 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:05 WARN  no build target for: /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java
+2026.04.11 20:19:05 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:05 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:05 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:41 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:41 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:44 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:44 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:44 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:44 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:46 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:46 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:46 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:51 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:19:51 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:20:12 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:20:12 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:20:12 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:20:19 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:20:19 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:20:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:20:25 WARN  no build target for: /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java
+2026.04.11 20:20:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:20:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:20:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:20:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:20:26 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:20:26 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:20:39 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:20:39 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:20:41 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:20:41 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:21:04 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:21:31 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:24:02 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:24:05 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:24:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/UserController.java. Using fallback presentation compiler.
+2026.04.11 20:24:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/UserController.java. Using fallback presentation compiler.
+2026.04.11 20:24:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/UserController.java. Using fallback presentation compiler.
+2026.04.11 20:24:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/UserController.java. Using fallback presentation compiler.
+2026.04.11 20:24:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/UserController.java. Using fallback presentation compiler.
+2026.04.11 20:24:08 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:24:08 WARN  no build target for: /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java
+2026.04.11 20:24:08 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:24:08 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:24:08 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:24:09 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:24:13 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:24:41 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:24:41 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:27:24 INFO  Started: Metals version 1.6.7 in folders '/home/vanquyen/repos/development/TicketRush' for client Cursor 1.105.1.
+2026.04.11 20:27:24 INFO  Memory monitor started
+2026.04.11 20:27:24 WARN  Using H2 2.4.240 which is newer than the version Flyway has been verified with. The latest verified version of H2 is 2.3.232.
+2026.04.11 20:27:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:27:24 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:27:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:27:25 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:27:27 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/CustomOidcUserService.java. Using fallback presentation compiler.
+2026.04.11 20:29:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/SecurityConfig.java. Using fallback presentation compiler.
+2026.04.11 20:29:09 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+Apr 11, 2026 8:30:07 PM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTrace
+2026.04.11 20:31:01 WARN  sql closed: select build_target_uri from dependency_source where text_document_uri = ?;
+2026.04.11 20:31:01 WARN  sql closed: select build_target_uri from dependency_source where text_document_uri = ?;
+2026.04.11 20:31:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/JwtAuthenticationFilter.java. Using fallback presentation compiler.
+2026.04.11 20:31:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:31:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:31:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/SecurityConfig.java. Using fallback presentation compiler.
+2026.04.11 20:34:48 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/SecurityConfig.java. Using fallback presentation compiler.
+2026.04.11 20:34:48 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/ServiceImpl/KeycloakAuthService.java. Using fallback presentation compiler.
+2026.04.11 20:34:48 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:34:48 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/config/JwtAuthenticationFilter.java. Using fallback presentation compiler.
+2026.04.11 20:38:12 INFO  Started: Metals version 1.6.7 in folders '/home/vanquyen/repos/development/TicketRush' for client Visual Studio Code 1.115.0.
+2026.04.11 20:38:12 INFO  Memory monitor started
+2026.04.11 20:38:12 WARN  Using H2 2.4.240 which is newer than the version Flyway has been verified with. The latest verified version of H2 is 2.3.232.
+2026.04.11 20:39:00 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+Apr 11, 2026 8:39:02 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 4
+Apr 11, 2026 8:39:02 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 5
+Apr 11, 2026 8:39:02 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 6
+2026.04.11 20:39:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+Apr 11, 2026 8:39:02 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 8
+2026.04.11 20:39:01 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+Apr 11, 2026 8:39:03 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 16
+2026.04.11 20:39:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+Apr 11, 2026 8:39:03 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 17
+2026.04.11 20:39:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+Apr 11, 2026 8:39:04 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 18
+Apr 11, 2026 8:39:04 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 19
+Apr 11, 2026 8:39:04 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 20
+2026.04.11 20:39:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+Apr 11, 2026 8:39:04 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 22
+Apr 11, 2026 8:39:04 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 23
+2026.04.11 20:39:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:03 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:04 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+Apr 11, 2026 8:39:04 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 25
+Apr 11, 2026 8:39:04 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 26
+Apr 11, 2026 8:39:04 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 27
+2026.04.11 20:39:04 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+Apr 11, 2026 8:39:04 PM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 31
+2026.04.11 20:39:04 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:04 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:04 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:06 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:07 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.
+2026.04.11 20:39:08 INFO  no build target found for /home/vanquyen/repos/development/TicketRush/src/main/java/com/example/ticketRush/UserModule/Controller/AuthController.java. Using fallback presentation compiler.

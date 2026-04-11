@@ -12,15 +12,10 @@ import org.springframework.security.oauth2.jwt.JwtDecoders;
 public class AppConfig {
     @Value("${spring.security.oauth2.client.provider.ticketRush.issuer-uri}")
     private String issuer;
-
     @Bean
     public JwtDecoder jwtDecoder() {
+        // Hàm này tự động gọi đến Keycloak để lấy khóa giải mã token
         return JwtDecoders.fromIssuerLocation(issuer);
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }
 
