@@ -1,33 +1,39 @@
 import { createBrowserRouter } from "react-router";
-import Root from "./Root";
-import Home from "./pages/customer/Home";
-import VirtualQueue from "./pages/customer/VirtualQueue";
-import EventDetail from "./pages/customer/EventDetail";
-import Checkout from "./pages/customer/Checkout";
-import MyTickets from "./pages/customer/MyTickets";
-import CustomerLogin from "./pages/customer/CustomerLogin";
-import AdminLogin from "./pages/admin/AdminLogin";
-import Dashboard from "./pages/admin/Dashboard";
-import EventManager from "./pages/admin/EventManager";
-import SeatMatrixBuilder from "./pages/admin/SeatMatrixBuilder";
-import NotFound from "./pages/NotFound";
+import { RootLayout } from "./components/layouts/root-layout";
+import { HomePage } from "./pages/home-page";
+import { EventDetailPage } from "./pages/event-detail-page";
+import { CheckoutPage } from "./pages/checkout-page";
+import { MyTicketsPage } from "./pages/my-tickets-page";
+import { LoginPage } from "./pages/login-page";
+import { AdminLayout } from "./components/layouts/admin-layout";
+import { AdminDashboard } from "./pages/admin/admin-dashboard";
+import { AdminEventsPage } from "./pages/admin/admin-events-page";
+import { AdminSeatBuilderPage } from "./pages/admin/admin-seat-builder-page";
+import { NotFoundPage } from "./pages/not-found-page";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: Root,
+    Component: RootLayout,
     children: [
-      { index: true, Component: Home },
-      { path: "queue/:eventId", Component: VirtualQueue },
-      { path: "event/:eventId", Component: EventDetail },
-      { path: "checkout", Component: Checkout },
-      { path: "login", Component: CustomerLogin },
-      { path: "my-tickets", Component: MyTickets },
-      { path: "admin/login", Component: AdminLogin },
-      { path: "admin/dashboard", Component: Dashboard },
-      { path: "admin/events", Component: EventManager },
-      { path: "admin/seat-builder/:eventId", Component: SeatMatrixBuilder },
-      { path: "*", Component: NotFound },
+      { index: true, Component: HomePage },
+      { path: "event/:id", Component: EventDetailPage },
+      { path: "checkout", Component: CheckoutPage },
+      { path: "my-tickets", Component: MyTicketsPage },
+      { path: "login", Component: LoginPage },
     ],
+  },
+  {
+    path: "/admin",
+    Component: AdminLayout,
+    children: [
+      { index: true, Component: AdminDashboard },
+      { path: "events", Component: AdminEventsPage },
+      { path: "events/:id/seats", Component: AdminSeatBuilderPage },
+    ],
+  },
+  {
+    path: "*",
+    Component: NotFoundPage,
   },
 ]);
