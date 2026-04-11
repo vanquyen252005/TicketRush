@@ -1,5 +1,11 @@
-import { apiFetch } from "../api-client";
-// import mockUsers from "../data/mock-users.json";
+import { apiFetch, API_BASE_URL } from "../api-client";
+
+// ─── Types ───────────────────────────────────────────────────────────────
+
+export interface LoginData {
+  identifier: string;
+  password: string;
+}
 
 export interface RegisterData {
   fullName: string;
@@ -8,95 +14,137 @@ export interface RegisterData {
   phoneNumber: string;
 }
 
-export interface LoginData {
-  email: string;
-  password?: string;
-}
-
-export interface AuthResponse {
-  token: string;
+export interface UserInfo {
+  id: string;
   email: string;
   fullName: string;
+  phoneNumber: string | null;
   role: string;
 }
 
-/*
-// Giả lập lưu trữ người dùng mới trong bộ nhớ khi đăng ký (nếu không có Backend)
-const registeredUsers = [...mockUsers];
-*/
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: UserInfo;
+}
+
+// ─── Token Management ────────────────────────────────────────────────────
+
+function saveTokens(response: AuthResponse) {
+  localStorage.setItem("accessToken", response.accessToken);
+  if (response.refreshToken) {
+    localStorage.setItem("refreshToken", response.refreshToken);
+  }
+  localStorage.setItem("user", JSON.stringify(response.user));
+}
+
+function clearTokens() {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
+}
+
+// ─── Auth Service ────────────────────────────────────────────────────────
 
 export const authService = {
+  /**
+   * Đăng nhập bằng username/email + password qua Keycloak ROPC.
+   */
+  login: async (data: LoginData): Promise<AuthResponse> => {
+    const response = await apiFetch<AuthResponse>("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+    saveTokens(response);
+    return response;
+  },
+
+  /**
+   * Đăng ký tài khoản mới.
+   */
   register: async (data: RegisterData): Promise<{ message: string }> => {
-    // --- CODE THẬT ---
     return apiFetch<{ message: string }>("/api/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
     });
-
-    // --- CODE GIẢ LẬP ĐỂ TEST (Đã comment) ---
-    /*
-    console.log("Simulating Registration:", data);
-    const newUser = {
-      id: String(registeredUsers.length + 1),
-      fullName: data.fullName,
-      email: data.email,
-      password: data.password || "123456",
-      phoneNumber: data.phoneNumber,
-      role: "ROLE_USER",
-      token: "mock-jwt-token-new-" + Date.now()
-    };
-    registeredUsers.push(newUser);
-
-    return new Promise((resolve) => {
-      setTimeout(() => resolve({ message: "Đăng ký thành công (Giả lập)" }), 1000);
-    });
-    */
   },
 
-  login: async (data: LoginData): Promise<AuthResponse> => {
-    // --- CODE THẬT ---
-    return apiFetch<AuthResponse>("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+  /**
+   * Đăng nhập bằng Keycloak OAuth2 (redirect-based).
+   * Redirect trực tiếp tới backend OAuth2 endpoint.
+   */
+  loginWithKeycloak: () => {
+    window.location.href = `${API_BASE_URL}/oauth2/authorization/ticketRush`;
+  },
 
-    // --- CODE GIẢ LẬP ĐỂ TEST (Đã comment) ---
-    /*
-    console.log("Simulating Login for:", data.email);
-    const user = registeredUsers.find(u => u.email === data.email && u.password === data.password);
-    
-    if (user) {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve({
-          token: user.token || "mock-token",
-          email: user.email,
-          fullName: user.fullName || "Người dùng giả lập",
-          role: user.role || "ROLE_USER"
-        }), 800);
-      });
+  /**
+   * Xử lý callback sau OAuth2 login: lưu tokens từ URL params.
+   */
+  handleOAuth2Callback: (token: string, refreshToken: string): void => {
+    localStorage.setItem("accessToken", token);
+    if (refreshToken) {
+      localStorage.setItem("refreshToken", refreshToken);
     }
-
-    throw new Error("Email hoặc mật khẩu không chính xác (Giả lập)");
-    */
   },
 
-  loginWithGoogle: async (idToken: string): Promise<AuthResponse> => {
-    // --- CODE THẬT ---
-    return apiFetch<AuthResponse>("/api/auth/google", {
+  /**
+   * Refresh access token.
+   */
+  refreshToken: async (): Promise<AuthResponse> => {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken) {
+      throw new Error("Không có refresh token");
+    }
+    const response = await apiFetch<AuthResponse>("/api/auth/refresh", {
       method: "POST",
-      body: JSON.stringify({ idToken }),
+      body: JSON.stringify({ refreshToken }),
     });
+    saveTokens(response);
+    return response;
+  },
 
-    // --- CODE GIẢ LẬP ĐỂ TEST (Đã comment) ---
-    /*
-    return new Promise((resolve) => {
-        setTimeout(() => resolve({
-          token: "mock-google-token",
-          email: "google-user@gmail.com",
-          fullName: "Google User",
-          role: "ROLE_USER"
-        }), 1000);
-      });
-    */
-  }
+  /**
+   * Lấy thông tin user hiện tại từ server.
+   */
+  getMe: async (): Promise<{
+    authenticated: boolean;
+    name: string;
+    authorities: string[];
+  }> => {
+    return apiFetch("/api/auth/me");
+  },
+
+  /**
+   * Đăng xuất: xoá tokens khỏi localStorage.
+   */
+  logout: (): void => {
+    clearTokens();
+  },
+
+  /**
+   * Kiểm tra đã đăng nhập chưa (có token trong localStorage).
+   */
+  isAuthenticated: (): boolean => {
+    return !!localStorage.getItem("accessToken");
+  },
+
+  /**
+   * Lấy thông tin user đã lưu trong localStorage.
+   */
+  getStoredUser: (): UserInfo | null => {
+    const userStr = localStorage.getItem("user");
+    if (!userStr) return null;
+    try {
+      return JSON.parse(userStr);
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * Lấy access token hiện tại.
+   */
+  getAccessToken: (): string | null => {
+    return localStorage.getItem("accessToken");
+  },
 };

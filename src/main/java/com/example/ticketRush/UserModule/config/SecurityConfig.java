@@ -1,76 +1,99 @@
 package com.example.ticketRush.UserModule.config;
 
 import com.example.ticketRush.UserModule.ServiceImpl.CustomOidcUserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.oauth2.client.oidc.web.logout.OidcClientInitiatedLogoutSuccessHandler;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    private final ClientRegistrationRepository clientRegistrationRepository;
-    private final CustomOidcUserService oidcUserService;
-    private final RoleBasedSuccessHandler roleBasedSuccessHandler;
 
-    public SecurityConfig(ClientRegistrationRepository clientRegistrationRepository, CustomOidcUserService oidcUserService, RoleBasedSuccessHandler roleBasedSuccessHandler) {
-        this.clientRegistrationRepository = clientRegistrationRepository;
+    private final CustomOidcUserService oidcUserService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CorsConfigurationSource corsConfigurationSource;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
+    public SecurityConfig(
+            CustomOidcUserService oidcUserService,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            CorsConfigurationSource corsConfigurationSource,
+            OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler
+    ) {
         this.oidcUserService = oidcUserService;
-        this.roleBasedSuccessHandler = roleBasedSuccessHandler;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.corsConfigurationSource = corsConfigurationSource;
+        this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        OidcClientInitiatedLogoutSuccessHandler handler = new OidcClientInitiatedLogoutSuccessHandler(clientRegistrationRepository);
-
-        handler.setPostLogoutRedirectUri("{baseUrl}/login");
-
         http
+                // ── CORS ─────────────────────────────────────────────────
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+
+                // ── CSRF: disable cho stateless REST API ─────────────────
+                .csrf(csrf -> csrf.disable())
+
+                // ── Session: stateless (SPA dùng JWT, không cần session) ─
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
+                // ── Authorization Rules ──────────────────────────────────
                 .authorizeHttpRequests(auth -> auth
-                        // Public pages – không cần đăng nhập
+                        // Public – Auth endpoints
                         .requestMatchers(
-                                "/login", "/logout", "/error",
-                                "/css/**", "/js/**", "/images/**",
-                                "/favicon.ico"
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/api/auth/refresh"
                         ).permitAll()
-                        // OAuth2 flow
-                        .requestMatchers("/oauth2/**").permitAll()
-                        // ── Swagger / OpenAPI ──────────────────────────────
+                        // Public – OAuth2 flow
+                        .requestMatchers(
+                                "/oauth2/**",
+                                "/login/oauth2/**",
+                                "/login"
+                        ).permitAll()
+                        // Public – Static resources
+                        .requestMatchers(
+                                "/css/**", "/js/**", "/images/**",
+                                "/favicon.ico", "/error"
+                        ).permitAll()
+                        // Public – Swagger / OpenAPI
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/v3/api-docs.yaml"
                         ).permitAll()
-                        // ── Admin area ─────────────────────────────────────
+                        // Admin area
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated())
-                .formLogin(form -> form
-                        .loginPage("/login")
-                        .usernameParameter("identifier")
-                        .passwordParameter("password")
-                        .successHandler(roleBasedSuccessHandler)
-                        .failureUrl("/login?error=true")
+                        // Tất cả request khác cần xác thực
+                        .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2->oauth2
+
+                // ── OAuth2 Login (Keycloak redirect-based flow) ──────────
+                .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .userInfoEndpoint(
-                                userInfo -> userInfo
-                                        .oidcUserService(oidcUserService)
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .oidcUserService(oidcUserService)
                         )
-                        .successHandler(roleBasedSuccessHandler)
+                        .successHandler(oAuth2LoginSuccessHandler)
                 )
-                .logout(logout->logout
-                        .logoutUrl("/logout")
-                        // nếu bạn logout bằng POST từ form thymeleaf thì giữ CSRF ok
-                        .logoutSuccessHandler(handler)
-                        .clearAuthentication(true)
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID"));
+
+                // ── JWT Filter (cho REST API calls) ──────────────────────
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }

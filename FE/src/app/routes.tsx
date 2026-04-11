@@ -5,6 +5,7 @@ import { EventDetailPage } from "./pages/event-detail-page";
 import { CheckoutPage } from "./pages/checkout-page";
 import { MyTicketsPage } from "./pages/my-tickets-page";
 import { LoginPage } from "./pages/login-page";
+import { OAuth2CallbackPage } from "./pages/oauth2-callback-page";
 import { AdminLayout } from "./components/layouts/admin-layout";
 import { AdminDashboard } from "./pages/admin/admin-dashboard";
 import { AdminEventsPage } from "./pages/admin/admin-events-page";
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
       { path: "checkout", Component: CheckoutPage },
       { path: "my-tickets", Component: MyTicketsPage },
       { path: "login", Component: LoginPage },
+      { path: "oauth2/callback", Component: OAuth2CallbackPage },
     ],
   },
   {

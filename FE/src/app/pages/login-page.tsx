@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
-import { Mail, Lock, User, Phone, Chrome, Loader2 } from "lucide-react";
+import { Mail, Lock, User, Phone, Chrome, Loader2, KeyRound } from "lucide-react";
 import { authService } from "../services/auth-service";
 import { toast } from "sonner";
 
@@ -11,6 +11,7 @@ export function LoginPage() {
 
   // Form states
   const [fullName, setFullName] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -21,10 +22,8 @@ export function LoginPage() {
 
     try {
       if (isLogin) {
-        const response = await authService.login({ email, password });
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("user", JSON.stringify(response));
-        toast.success("Đăng nhập thành công!");
+        const response = await authService.login({ identifier, password });
+        toast.success(`Chào mừng ${response.user.fullName}!`);
         navigate("/");
       } else {
         await authService.register({
@@ -34,7 +33,7 @@ export function LoginPage() {
           phoneNumber
         });
         toast.success("Đăng ký thành công! Vui lòng đăng nhập.");
-        setIsLogin(true); // Switch to login mode
+        setIsLogin(true);
       }
     } catch (error: any) {
       toast.error(error.message || "Đã xảy ra lỗi. Vui lòng thử lại.");
@@ -43,8 +42,8 @@ export function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    toast.info("Tính năng đăng nhập Google đang được thiết lập...");
+  const handleKeycloakLogin = () => {
+    authService.loginWithKeycloak();
   };
 
   return (
@@ -67,14 +66,14 @@ export function LoginPage() {
               </p>
             </div>
 
-            {/* Google Login */}
+            {/* Keycloak Login */}
             <button
-              onClick={handleGoogleLogin}
+              onClick={handleKeycloakLogin}
               className="w-full py-3 px-4 border-2 border-slate-300 rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-3 mb-6"
             >
-              <Chrome className="w-5 h-5 text-red-500" />
+              <KeyRound className="w-5 h-5 text-blue-600" />
               <span className="font-semibold text-slate-700">
-                Tiếp tục với Google
+                Đăng nhập với Keycloak
               </span>
             </button>
 
@@ -108,22 +107,47 @@ export function LoginPage() {
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="email"
-                    placeholder="example@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                    required
-                  />
+              {isLogin ? (
+                /* Login: identifier field (username hoặc email) */
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Email hoặc Username
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                      id="login-identifier"
+                      type="text"
+                      placeholder="email@example.com hoặc username"
+                      value={identifier}
+                      onChange={(e) => setIdentifier(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      required
+                      autoComplete="username"
+                    />
+                  </div>
                 </div>
-              </div>
+              ) : (
+                /* Register: email field */
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                    <input
+                      id="register-email"
+                      type="email"
+                      placeholder="example@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      required
+                      autoComplete="email"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -138,6 +162,7 @@ export function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
                     required
+                    autoComplete={isLogin ? "current-password" : "new-password"}
                   />
                 </div>
               </div>

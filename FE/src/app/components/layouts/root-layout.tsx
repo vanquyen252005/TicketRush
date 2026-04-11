@@ -1,11 +1,35 @@
-import { Outlet, Link, useLocation } from "react-router";
-import { Ticket, Home, User, LogIn } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Outlet, Link, useLocation, useNavigate } from "react-router";
+import { Ticket, Home, User, LogIn, LogOut, ChevronDown } from "lucide-react";
+import { authService } from "../../services/auth-service";
 
 export function RootLayout() {
   const location = useLocation();
-  
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Kiểm tra trạng thái đăng nhập khi route thay đổi
+  useEffect(() => {
+    const authenticated = authService.isAuthenticated();
+    setIsLoggedIn(authenticated);
+    if (authenticated) {
+      const user = authService.getStoredUser();
+      setUserName(user?.fullName || user?.email || "User");
+    }
+  }, [location.pathname]);
+
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleLogout = () => {
+    authService.logout();
+    setIsLoggedIn(false);
+    setUserName("");
+    setShowUserMenu(false);
+    navigate("/login");
   };
 
   return (
@@ -48,17 +72,51 @@ export function RootLayout() {
                 <Ticket className="w-4 h-4" />
                 <span>Vé của tôi</span>
               </Link>
-              <Link
-                to="/login"
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  isActive('/login') 
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white' 
-                    : 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600'
-                }`}
-              >
-                <User className="w-4 h-4" />
-                <span>Đăng nhập</span>
-              </Link>
+
+              {isLoggedIn ? (
+                /* ─── Logged in: hiển thị tên user + menu ─── */
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600 transition-all"
+                  >
+                    <User className="w-4 h-4" />
+                    <span className="max-w-[120px] truncate">{userName}</span>
+                    <ChevronDown className="w-3 h-3" />
+                  </button>
+
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50">
+                      <div className="px-4 py-2 border-b border-slate-100">
+                        <p className="text-sm font-medium text-slate-800 truncate">{userName}</p>
+                        <p className="text-xs text-slate-500">
+                          {authService.getStoredUser()?.email}
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Đăng xuất
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* ─── Not logged in: hiển thị nút Đăng nhập ─── */
+                <Link
+                  to="/login"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    isActive('/login') 
+                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white' 
+                      : 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600'
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  <span>Đăng nhập</span>
+                </Link>
+              )}
             </nav>
 
             {/* Mobile Menu */}
@@ -69,16 +127,33 @@ export function RootLayout() {
               >
                 <Ticket className="w-5 h-5" />
               </Link>
-              <Link
-                to="/login"
-                className="p-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
-              >
-                <LogIn className="w-5 h-5" />
-              </Link>
+              {isLoggedIn ? (
+                <button
+                  onClick={handleLogout}
+                  className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="p-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
+                >
+                  <LogIn className="w-5 h-5" />
+                </Link>
+              )}
             </div>
           </div>
         </div>
       </header>
+
+      {/* Click outside to close user menu */}
+      {showUserMenu && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowUserMenu(false)}
+        />
+      )}
 
       {/* Main Content */}
       <main>

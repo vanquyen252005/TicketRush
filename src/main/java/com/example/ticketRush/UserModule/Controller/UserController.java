@@ -31,43 +31,6 @@ public class UserController {
 
     // ─── Lấy profile ────────────────────────────────────────────────────────
 
-    @Operation(
-            summary = "Lấy hồ sơ cá nhân",
-            description = """
-                    Trả về thông tin hồ sơ của người dùng **đang đăng nhập**.
-                    
-                    Yêu cầu JWT Bearer Token hợp lệ trong header:
-                    ```
-                    Authorization: Bearer <token>
-                    ```
-                    """
-    )
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Lấy hồ sơ thành công",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UserResponse.class),
-                            examples = @ExampleObject(
-                                    name = "User thông thường",
-                                    value = """
-                                            {
-                                              "id": "550e8400-e29b-41d4-a716-446655440000",
-                                              "email": "user@example.com",
-                                              "fullName": "Nguyễn Văn A",
-                                              "phoneNumber": "0901234567",
-                                              "role": "ROLE_USER"
-                                            }
-                                            """
-                            )
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Chưa đăng nhập hoặc token không hợp lệ / hết hạn"
-            )
-    })
     @GetMapping("/profile")
     public ResponseEntity<UserResponse> getProfile(
             @Parameter(hidden = true) Authentication authentication
