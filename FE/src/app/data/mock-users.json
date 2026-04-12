@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1",
+    "fullName": "Nguyễn Văn Admin",
+    "email": "admin@ticketrush.com",
+    "password": "password123",
+    "phoneNumber": "0987654321",
+    "role": "ROLE_ADMIN",
+    "token": "mock-jwt-token-admin"
+  },
+  {
+    "id": "2",
+    "fullName": "Trần Thị Người Dùng",
+    "email": "user@gmail.com",
+    "password": "user123",
+    "phoneNumber": "0123456789",
+    "role": "ROLE_USER",
+    "token": "mock-jwt-token-user"
+  }
+]
