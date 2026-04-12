@@ -1,0 +1,56 @@
+[
+  { "id": 1, "event_id": 1, "name": "VIP Sân Khấu", "base_price": 5000000, "color_hex": "#FF0000", "capacity": 100 },
+  { "id": 2, "event_id": 1, "name": "Khu vực A", "base_price": 3000000, "color_hex": "#FFA500", "capacity": 500 },
+  { "id": 3, "event_id": 1, "name": "Khu vực B", "base_price": 1500000, "color_hex": "#FFFF00", "capacity": 1000 },
+  { "id": 4, "event_id": 1, "name": "Phổ thông", "base_price": 800000, "color_hex": "#008000", "capacity": 2000 },
+  
+  { "id": 5, "event_id": 2, "name": "VVIP (Kèm Quà)", "base_price": 4500000, "color_hex": "#FF1493", "capacity": 50 },
+  { "id": 6, "event_id": 2, "name": "VIP", "base_price": 3500000, "color_hex": "#C71585", "capacity": 150 },
+  { "id": 7, "event_id": 2, "name": "Standard", "base_price": 1800000, "color_hex": "#DB7093", "capacity": 300 },
+  
+  { "id": 8, "event_id": 3, "name": "GA Standing", "base_price": 1200000, "color_hex": "#00FFFF", "capacity": 5000 },
+  { "id": 9, "event_id": 3, "name": "VIP Standing", "base_price": 2500000, "color_hex": "#1E90FF", "capacity": 1000 },
+  
+  { "id": 10, "event_id": 4, "name": "Khán đài A", "base_price": 1000000, "color_hex": "#B22222", "capacity": 5000 },
+  { "id": 11, "event_id": 4, "name": "Khán đài B", "base_price": 800000, "color_hex": "#FF4500", "capacity": 8000 },
+  { "id": 12, "event_id": 4, "name": "Khán đài C", "base_price": 400000, "color_hex": "#FFD700", "capacity": 10000 },
+  { "id": 13, "event_id": 4, "name": "Khán đài D", "base_price": 400000, "color_hex": "#FFD700", "capacity": 10000 },
+  
+  { "id": 14, "event_id": 9, "name": "VIP Court-side", "base_price": 2000000, "color_hex": "#4B0082", "capacity": 100 },
+  { "id": 15, "event_id": 9, "name": "Standard Court", "base_price": 500000, "color_hex": "#8A2BE2", "capacity": 500 },
+  
+  { "id": 16, "event_id": 11, "name": "VIP (High-Five)", "base_price": 5000000, "color_hex": "#FF8C00", "capacity": 80 },
+  { "id": 17, "event_id": 11, "name": "Zone A", "base_price": 3000000, "color_hex": "#E9967A", "capacity": 200 },
+  { "id": 18, "event_id": 11, "name": "Zone B", "base_price": 1500000, "color_hex": "#F08080", "capacity": 400 },
+  
+  { "id": 19, "event_id": 12, "name": "Courtside A", "base_price": 1200000, "color_hex": "#0000CD", "capacity": 100 },
+  { "id": 20, "event_id": 12, "name": "Standard A", "base_price": 450000, "color_hex": "#4169E1", "capacity": 600 },
+  { "id": 21, "event_id": 12, "name": "Standard B", "base_price": 250000, "color_hex": "#6495ED", "capacity": 1000 },
+  
+  { "id": 22, "event_id": 14, "name": "Pit Row", "base_price": 500000, "color_hex": "#32CD32", "capacity": 200 },
+  { "id": 23, "event_id": 14, "name": "Grandstand A", "base_price": 300000, "color_hex": "#228B22", "capacity": 1000 },
+  
+  { "id": 24, "event_id": 18, "name": "VIP", "base_price": 1500000, "color_hex": "#FFD700", "capacity": 100 },
+  { "id": 25, "event_id": 18, "name": "Zone A", "base_price": 1000000, "color_hex": "#C0C0C0", "capacity": 200 },
+  { "id": 26, "event_id": 18, "name": "Zone B", "base_price": 600000, "color_hex": "#CD7F32", "capacity": 500 },
+  
+  { "id": 27, "event_id": 21, "name": "Fanzone", "base_price": 1000000, "color_hex": "#800080", "capacity": 200 },
+  { "id": 28, "event_id": 21, "name": "General Admission", "base_price": 500000, "color_hex": "#9932CC", "capacity": 800 },
+  
+  { "id": 29, "event_id": 23, "name": "VVIP (Meet & Greet)", "base_price": 6000000, "color_hex": "#EE82EE", "capacity": 30 },
+  { "id": 30, "event_id": 23, "name": "VIP", "base_price": 4000000, "color_hex": "#DA70D6", "capacity": 200 },
+  { "id": 31, "event_id": 23, "name": "Zone A", "base_price": 2000000, "color_hex": "#BA55D3", "capacity": 500 },
+  
+  { "id": 32, "event_id": 24, "name": "Mosh Pit", "base_price": 800000, "color_hex": "#2F4F4F", "capacity": 1000 },
+  { "id": 33, "event_id": 24, "name": "GA Standing", "base_price": 400000, "color_hex": "#708090", "capacity": 3000 },
+  
+  { "id": 34, "event_id": 25, "name": "Khán đài", "base_price": 100000, "color_hex": "#00CED1", "capacity": 500 },
+  
+  { "id": 35, "event_id": 27, "name": "VIP (Tiệc trà)", "base_price": 1200000, "color_hex": "#483D8B", "capacity": 100 },
+  { "id": 36, "event_id": 27, "name": "Standard", "base_price": 600000, "color_hex": "#6A5ACD", "capacity": 400 },
+  
+  { "id": 37, "event_id": 30, "name": "Premium", "base_price": 2000000, "color_hex": "#A52A2A", "capacity": 100 },
+  { "id": 38, "event_id": 30, "name": "Standard A", "base_price": 1200000, "color_hex": "#D2691E", "capacity": 200 },
+  { "id": 39, "event_id": 30, "name": "Standard B", "base_price": 800000, "color_hex": "#DEB887", "capacity": 300 },
+  { "id": 40, "event_id": 30, "name": "Student", "base_price": 400000, "color_hex": "#F5DEB3", "capacity": 100 }
+]

@@ -1,175 +1,100 @@
-import { useState } from "react";
-import { Link } from "react-router";
-import { User, Mail, Phone, Loader2, KeyRound } from "lucide-react";
-import { authService } from "../services/auth-service";
-import { toast } from "sonner";
+import { useEffect } from "react";
+import { useNavigate, Link } from "react-router";
+import { User, Chrome, LogIn, UserPlus } from "lucide-react";
+import { useAuth } from "../hooks/use-auth";
 
 export function LoginPage() {
-  const [isRegister, setIsRegister] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login, register, isAuthenticated, isInitialized } = useAuth();
 
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-
-  const handleKeycloakLogin = () => {
-    authService.loginWithKeycloak();
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    try {
-      await authService.register({
-        fullName,
-        email,
-        password,
-        phoneNumber,
-      });
-      toast.success("Đăng ký thành công! Vui lòng đăng nhập qua Keycloak.");
-      setIsRegister(false);
-    } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Đã xảy ra lỗi. Vui lòng thử lại.";
-      toast.error(message);
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    if (isInitialized && isAuthenticated) {
+      navigate("/");
     }
+  }, [isAuthenticated, isInitialized, navigate]);
+
+  const handleLogin = () => {
+    login();
   };
+
+  const handleRegister = () => {
+    register();
+  };
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12">
       <div className="container mx-auto px-4">
         <div className="max-w-md mx-auto">
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <User className="w-8 h-8 text-white" />
+          <div className="bg-white rounded-3xl shadow-xl p-10 border border-slate-100">
+            {/* Logo */}
+            <div className="text-center mb-10">
+              <div className="w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-cyan-200">
+                <User className="w-10 h-10 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-slate-800">
-                {isRegister ? "Đăng ký" : "Đăng nhập"}
+              <h1 className="text-3xl font-bold text-slate-800">
+                TicketRush Auth
               </h1>
-              <p className="text-slate-600 mt-2">
-                {isRegister
-                  ? "Tạo hồ sơ trong ứng dụng (nếu API đăng ký đã bật)"
-                  : "Đăng nhập an toàn qua Keycloak (OAuth2 / OpenID Connect)"}
+              <p className="text-slate-500 mt-3 text-lg">
+                Hệ thống xác thực bảo mật qua Keycloak
               </p>
             </div>
 
-            {!isRegister && (
-              <>
-                <button
-                  type="button"
-                  onClick={handleKeycloakLogin}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all flex items-center justify-center gap-3 mb-4 font-semibold shadow-md"
-                >
-                  <KeyRound className="w-5 h-5" />
-                  Đăng nhập với Keycloak
-                </button>
-                <p className="text-center text-sm text-slate-500 mb-6">
-                  Bạn sẽ được chuyển tới trang đăng nhập Keycloak, sau đó quay lại ứng dụng với token.
-                </p>
-              </>
-            )}
+            <div className="space-y-4">
+              <button
+                onClick={handleLogin}
+                className="w-full py-4 px-6 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-2xl hover:from-cyan-700 hover:to-blue-700 transition-all hover:shadow-xl font-bold flex items-center justify-center gap-3 text-lg"
+              >
+                <LogIn className="w-6 h-6" />
+                Đăng nhập ngay
+              </button>
 
-            {!isRegister && (
-              <div className="relative mb-6">
+              <button
+                onClick={handleRegister}
+                className="w-full py-4 px-6 bg-white border-2 border-slate-200 text-slate-700 rounded-2xl hover:bg-slate-50 transition-all font-bold flex items-center justify-center gap-3 text-lg"
+              >
+                <UserPlus className="w-6 h-6" />
+                Đăng ký tài khoản
+              </button>
+
+              <div className="relative py-4">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-300" />
+                  <div className="w-full border-t border-slate-200"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-slate-500">Hoặc</span>
+                  <span className="px-4 bg-white text-slate-400">Hoặc tiếp tục với</span>
                 </div>
               </div>
-            )}
 
-            {isRegister ? (
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Họ và tên</label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Nguyễn Văn A"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      type="email"
-                      placeholder="example@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                      required
-                      autoComplete="email"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Mật khẩu</label>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                    required
-                    autoComplete="new-password"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Số điện thoại</label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      type="tel"
-                      placeholder="0123456789"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                      required
-                    />
-                  </div>
-                </div>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all font-semibold flex items-center justify-center gap-2"
-                >
-                  {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
-                  Đăng ký
-                </button>
-              </form>
-            ) : (
-              <p className="text-sm text-slate-600 text-center">
-                Chưa có tài khoản Keycloak? Tạo user trong realm{" "}
-                <code className="text-xs bg-slate-100 px-1 rounded">ticketRush</code> trên máy chủ Keycloak của bạn.
-              </p>
-            )}
-
-            <div className="mt-6 text-center text-sm">
               <button
-                type="button"
-                onClick={() => setIsRegister(!isRegister)}
-                className="text-cyan-600 hover:text-cyan-700 font-semibold"
+                className="w-full py-4 px-6 border-2 border-slate-200 rounded-2xl hover:bg-slate-50 transition-all flex items-center justify-center gap-3 font-semibold text-slate-600"
               >
-                {isRegister ? "Quay lại đăng nhập" : "Form đăng ký ứng dụng (tuỳ chọn)"}
+                <Chrome className="w-5 h-5 text-red-500" />
+                Google (via Keycloak)
               </button>
             </div>
+
+            <p className="mt-10 text-center text-sm text-slate-400">
+              Bằng cách đăng nhập, bạn đồng ý với{" "}
+              <a href="#" className="underline hover:text-cyan-600">Điều khoản</a>{" "}
+              và{" "}
+              <a href="#" className="underline hover:text-cyan-600">Chính sách bảo mật</a>
+            </p>
           </div>
 
-          <div className="mt-6 text-center">
-            <Link to="/admin" className="text-sm text-slate-600 hover:text-cyan-600 underline">
-              Khu vực quản trị
+          <div className="mt-8 text-center">
+            <Link
+              to="/"
+              className="text-slate-500 hover:text-cyan-600 transition-colors font-medium"
+            >
+              ← Quay lại trang chủ
             </Link>
           </div>
         </div>

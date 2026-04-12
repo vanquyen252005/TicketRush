@@ -1,34 +1,22 @@
-import { useState, useEffect } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
-import { Ticket, Home, User, LogIn, LogOut, ChevronDown } from "lucide-react";
-import { authService } from "../../services/auth-service";
+import { Ticket, Home, User, LogIn, LogOut, ChevronDown, AlertCircle } from "lucide-react";
+import { useAuth } from "../../hooks/use-auth";
+import { useState } from "react";
 
 export function RootLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("");
+  const { user, isAuthenticated, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
-
-  // Kiểm tra trạng thái đăng nhập khi route thay đổi
-  useEffect(() => {
-    const authenticated = authService.isAuthenticated();
-    setIsLoggedIn(authenticated);
-    if (authenticated) {
-      const user = authService.getStoredUser();
-      setUserName(user?.fullName || user?.email || "User");
-    }
-  }, [location.pathname]);
-
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  
   const isActive = (path: string) => {
     return location.pathname === path;
   };
 
   const handleLogout = () => {
-    authService.logout();
-    setIsLoggedIn(false);
-    setUserName("");
-    setShowUserMenu(false);
+    logout();
+    setShowLogoutConfirm(false);
     navigate("/login");
   };
 
@@ -72,39 +60,61 @@ export function RootLayout() {
                 <Ticket className="w-4 h-4" />
                 <span>Vé của tôi</span>
               </Link>
-
-              {isLoggedIn ? (
-                /* ─── Logged in: hiển thị tên user + menu ─── */
+              {isAuthenticated ? (
                 <div className="relative">
-                  <button
-                    onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600 transition-all"
-                  >
-                    <User className="w-4 h-4" />
-                    <span className="max-w-[120px] truncate">{userName}</span>
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
+                    <button 
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-white transition-all"
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                        {user?.full_name ? user.full_name.charAt(0).toUpperCase() : '?'}
+                      </div>
+                      <span className="font-medium max-w-[100px] truncate">{user?.full_name || 'Người dùng'}</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                    </button>
 
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-slate-200 py-2 z-50">
-                      <div className="px-4 py-2 border-b border-slate-100">
-                        <p className="text-sm font-medium text-slate-800 truncate">{userName}</p>
-                        <p className="text-xs text-slate-500">
-                          {authService.getStoredUser()?.email}
-                        </p>
-                      </div>
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+                      <Link
+                        to="/profile"
+                        onClick={() => setShowUserMenu(false)}
+                        className="block px-4 py-3 border-b border-slate-50 mb-1 hover:bg-slate-50 transition-colors"
                       >
-                        <LogOut className="w-4 h-4" />
-                        Đăng xuất
-                      </button>
+                        <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Tài khoản</p>
+                        <p className="text-sm font-bold text-slate-800 truncate">{user?.full_name}</p>
+                        <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+                      </Link>
+
+                      
+                      <div className="py-1">
+                        <Link
+                          to="/profile"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors text-sm font-medium"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                            <User className="w-4 h-4" />
+                          </div>
+                          <span>Thông tin cá nhân</span>
+                        </Link>
+                        
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            setShowLogoutConfirm(true);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-600">
+                            <LogOut className="w-4 h-4" />
+                          </div>
+                          <span>Đăng xuất</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               ) : (
-                /* ─── Not logged in: hiển thị nút Đăng nhập ─── */
                 <Link
                   to="/login"
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
@@ -127,10 +137,10 @@ export function RootLayout() {
               >
                 <Ticket className="w-5 h-5" />
               </Link>
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 <button
-                  onClick={handleLogout}
-                  className="p-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors"
+                  onClick={() => setShowLogoutConfirm(true)}
+                  className="p-2 rounded-lg text-red-600 hover:bg-red-50"
                 >
                   <LogOut className="w-5 h-5" />
                 </button>
@@ -147,12 +157,39 @@ export function RootLayout() {
         </div>
       </header>
 
-      {/* Click outside to close user menu */}
-      {showUserMenu && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setShowUserMenu(false)}
-        />
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setShowLogoutConfirm(false)}
+          ></div>
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-300 border border-white/20">
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <AlertCircle className="w-10 h-10 text-red-500" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-2">Đăng xuất</h3>
+              <p className="text-slate-500">
+                Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?
+              </p>
+            </div>
+            <div className="flex border-t border-slate-100">
+              <button 
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 px-6 py-4 text-slate-600 font-semibold hover:bg-slate-50 transition-colors border-r border-slate-100"
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="flex-1 px-6 py-4 text-red-600 font-bold hover:bg-red-50 transition-colors"
+              >
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Main Content */}

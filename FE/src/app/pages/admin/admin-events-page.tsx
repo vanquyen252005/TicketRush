@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Plus, Search, Edit, Trash2, Settings, MapPin, Calendar, Loader2, AlertCircle } from "lucide-react";
-import { eventService } from "../../services/event-service";
-import { Event } from "../../data/mock-data";
+// import { eventService } from "../../services/event-service";
+import { Event, mockEvents } from "../../data/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 
@@ -17,13 +17,19 @@ export function AdminEventsPage() {
     const fetchEvents = async () => {
       try {
         setIsLoading(true);
+        // Tạm thời comment API để dùng mock data
+        /*
         const data = await eventService.getAllEvents();
         setEvents(data);
+        setError(null);
+        */
+
+        // Sử dụng mock data
+        setEvents(mockEvents);
         setError(null);
       } catch (err) {
         console.error("Failed to fetch events:", err);
         setError("Không thể tải danh sách sự kiện. Vui lòng kiểm tra kết nối Backend.");
-        // Fallback to empty array or keep current state
       } finally {
         setIsLoading(false);
       }
@@ -67,38 +73,27 @@ export function AdminEventsPage() {
   };
 
   return (
-    <div className="p-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800 mb-2">
-              Quản lý Sự kiện
-            </h1>
-            <p className="text-slate-600">
-              Tạo và quản lý tất cả sự kiện của bạn
-            </p>
-          </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all hover:shadow-lg"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Tạo sự kiện mới</span>
-          </button>
-        </div>
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all hover:shadow-lg"
+        >
+          <Plus className="w-5 h-5" />
+          <span>Tạo sự kiện mới</span>
+        </button>
+      </div>
 
-        {/* Search Bar */}
-        <div className="flex items-center gap-3 px-4 py-3 bg-white border border-slate-200 rounded-xl max-w-md">
-          <Search className="w-5 h-5 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm sự kiện..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 bg-transparent outline-none text-slate-800 placeholder:text-slate-400"
-          />
-        </div>
+      {/* Search Bar */}
+      <div className="flex items-center gap-3 px-4 py-3 bg-white border border-slate-200 rounded-xl max-w-md">
+        <Search className="w-5 h-5 text-slate-400" />
+        <input
+          type="text"
+          placeholder="Tìm kiếm sự kiện..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="flex-1 bg-transparent outline-none text-slate-800 placeholder:text-slate-400"
+        />
       </div>
 
       {/* Loading State */}
@@ -115,7 +110,7 @@ export function AdminEventsPage() {
           <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
           <h3 className="text-lg font-bold text-red-800 mb-2">Lỗi kết nối</h3>
           <p className="text-red-700 mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
           >
@@ -129,7 +124,7 @@ export function AdminEventsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredEvents.map((event) => {
             const eventDate = new Date(event.start_time);
-            
+
             return (
               <div
                 key={event.id}

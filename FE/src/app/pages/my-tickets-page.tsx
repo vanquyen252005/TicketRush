@@ -1,18 +1,30 @@
 import { useState } from "react";
+import { useLocation, Link } from "react-router";
+import { useAuth } from "../hooks/use-auth";
+import { LoginPage } from "./login-page";
 import { Ticket, MapPin, Calendar, Clock, QrCode, X } from "lucide-react";
-import { mockBookings } from "../data/mock-data";
+import { mockBookings, mockEvents, mockBookingItems } from "../data/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 
 export function MyTicketsPage() {
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
+  const isAdminView = location.pathname.startsWith('/admin');
+  const homeLink = isAdminView ? '/admin/view-home' : '/';
+
+  // Filter bookings for current user
+  const userBookings = mockBookings.filter(b => b.user_id === user?.id);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'UNUSED':
+      case 'CONFIRMED':
         return (
           <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-            Chưa sử dụng
+            Đã xác nhận
           </span>
         );
       case 'USED':
@@ -22,9 +34,10 @@ export function MyTicketsPage() {
           </span>
         );
       case 'REFUNDED':
+      case 'CANCELLED':
         return (
           <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
-            Đã hoàn
+            Đã hủy
           </span>
         );
       default:
@@ -33,18 +46,20 @@ export function MyTicketsPage() {
   };
 
   return (
-    <div className="min-h-screen py-12">
-      <div className="container mx-auto px-4">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">
-            Vé của tôi
-          </h1>
-          <p className="text-slate-600">
-            Quản lý tất cả vé điện tử của bạn
-          </p>
-        </div>
+    <div className={`min-h-screen ${isAdminView ? 'p-0' : 'py-12'}`}>
+      <div className={isAdminView ? 'w-full' : 'container mx-auto px-4'}>
+        {!isAdminView && (
+          <div className="mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold text-slate-800 mb-2">
+              Vé của tôi
+            </h1>
+            <p className="text-slate-600">
+              Quản lý tất cả vé điện tử của bạn
+            </p>
+          </div>
+        )}
 
-        {mockBookings.length === 0 ? (
+        {userBookings.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-24 h-24 mx-auto mb-6 bg-slate-100 rounded-full flex items-center justify-center">
               <Ticket className="w-12 h-12 text-slate-400" />
@@ -55,17 +70,19 @@ export function MyTicketsPage() {
             <p className="text-slate-500 mb-6">
               Bạn chưa đặt vé cho sự kiện nào
             </p>
-            <a
-              href="/"
-              className="inline-block px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:from-cyan-700 hover:to-blue-700"
+            <Link
+              to={homeLink}
+              className="inline-block px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg hover:from-cyan-700 hover:to-blue-700 font-bold transition-all shadow-lg shadow-cyan-500/20"
             >
               Khám phá sự kiện
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {mockBookings.map((booking) => {
-              const eventDate = new Date(booking.event_date);
+            {userBookings.map((booking) => {
+              const event = mockEvents.find(e => e.id === booking.event_id);
+              const items = mockBookingItems.filter(item => item.booking_id === booking.id);
+              const eventDate = event ? new Date(event.start_time) : new Date();
               
               return (
                 <div
@@ -77,12 +94,12 @@ export function MyTicketsPage() {
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <h3 className="text-xl font-bold mb-2">
-                          {booking.event_name}
+                          {event?.name || 'Sự kiện không còn tồn tại'}
                         </h3>
                         <div className="space-y-1 text-cyan-50 text-sm">
                           <div className="flex items-center gap-2">
                             <MapPin className="w-4 h-4" />
-                            <span>{booking.location}</span>
+                            <span>{event?.location}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
@@ -94,7 +111,7 @@ export function MyTicketsPage() {
                           </div>
                         </div>
                       </div>
-                      {getStatusBadge(booking.check_in_status)}
+                      {getStatusBadge(booking.status)}
                     </div>
                   </div>
 
@@ -105,12 +122,12 @@ export function MyTicketsPage() {
                         Ghế đã đặt
                       </h4>
                       <div className="flex flex-wrap gap-2">
-                        {booking.seats.map((seat, idx) => (
+                        {items.map((item) => (
                           <div
-                            key={idx}
+                            key={item.id}
                             className="px-3 py-1 bg-cyan-50 text-cyan-700 rounded-lg text-sm font-semibold"
                           >
-                            {seat.zone} - {seat.row}{seat.number}
+                            {item.seat_label}
                           </div>
                         ))}
                       </div>
@@ -124,7 +141,13 @@ export function MyTicketsPage() {
                     </div>
 
                     <button
-                      onClick={() => setSelectedTicket(booking.id)}
+                      onClick={() => {
+                        if (isAuthenticated) {
+                          setSelectedTicket(booking.id);
+                        } else {
+                          setShowLoginModal(true);
+                        }
+                      }}
                       className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all hover:shadow-lg flex items-center justify-center gap-2"
                     >
                       <QrCode className="w-5 h-5" />
@@ -133,7 +156,7 @@ export function MyTicketsPage() {
 
                     <div className="mt-3 text-center">
                       <span className="text-xs text-slate-500">
-                        Mã vé: {booking.ticket_code}
+                        ID Đơn: {booking.id.substring(0, 8).toUpperCase()}
                       </span>
                     </div>
                   </div>
@@ -157,51 +180,64 @@ export function MyTicketsPage() {
 
         {/* QR Code Modal */}
         {selectedTicket && (
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedTicket(null)}
-          >
             <div
-              className="bg-white rounded-2xl max-w-md w-full p-8"
-              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setSelectedTicket(null)}
             >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-slate-800">Mã QR vé</h3>
-                <button
-                  onClick={() => setSelectedTicket(null)}
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
+              <div
+                className="bg-white rounded-2xl max-w-md w-full p-8"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-slate-800">Mã QR vé</h3>
+                  <button
+                    onClick={() => setSelectedTicket(null)}
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
 
-              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-8 mb-6">
-                <div className="bg-white p-4 rounded-lg shadow-lg">
-                  <img
-                    src={mockBookings.find(b => b.id === selectedTicket)?.qr_code}
-                    alt="QR Code"
-                    className="w-full h-auto"
-                  />
+                <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-8 mb-6">
+                  <div className="bg-white p-4 rounded-lg shadow-lg">
+                    {/* Placeholder for QR Code - In real app use a library */}
+                    <div className="w-full aspect-square bg-slate-100 rounded-lg flex items-center justify-center">
+                      <QrCode className="w-32 h-32 text-slate-400" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center space-y-2">
+                  <p className="text-slate-600">
+                    Vui lòng xuất trình mã QR này tại cổng
+                  </p>
+                  <p className="font-mono font-bold text-cyan-600 text-lg">
+                    {selectedTicket.substring(0, 8).toUpperCase()}
+                  </p>
+                </div>
+
+                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800 text-center">
+                    ⚠️ Tăng độ sáng màn hình để máy quét dễ đọc mã
+                  </p>
                 </div>
               </div>
-
-              <div className="text-center space-y-2">
-                <p className="text-slate-600">
-                  Vui lòng xuất trình mã QR này tại cổng
-                </p>
-                <p className="font-mono font-bold text-cyan-600 text-lg">
-                  {selectedTicket}
-                </p>
-              </div>
-
-              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800 text-center">
-                  ⚠️ Tăng độ sáng màn hình để máy quét dễ đọc mã
-                </p>
+            </div>
+          )}
+          
+          {showLoginModal && (
+            <div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowLoginModal(false)}
+            >
+              <div
+                className="bg-white rounded-2xl max-w-md w-full p-8"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <LoginPage />
               </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
     </div>
   );
