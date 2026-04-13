@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, login } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -40,7 +40,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
               Bạn chưa đăng nhập, vui lòng đăng nhập để xem thông tin vé của mình.
             </p>
             <button
-              onClick={() => navigate("/login", { state: { from: location } })}
+              onClick={() => login()}
               className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-2xl hover:from-cyan-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-cyan-900/20 font-bold text-lg"
             >
               Đăng nhập ngay

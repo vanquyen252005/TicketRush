@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useLocation, Link } from "react-router";
 import { useAuth } from "../hooks/use-auth";
-import { LoginPage } from "./login-page";
 import { Ticket, MapPin, Calendar, Clock, QrCode, X } from "lucide-react";
 import { mockBookings, mockEvents, mockBookingItems } from "../data/utils";
 import { format } from "date-fns";
@@ -9,8 +8,7 @@ import { vi } from "date-fns/locale";
 
 export function MyTicketsPage() {
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, login } = useAuth();
   const location = useLocation();
   const isAdminView = location.pathname.startsWith('/admin');
   const homeLink = isAdminView ? '/admin/view-home' : '/';
@@ -83,7 +81,7 @@ export function MyTicketsPage() {
               const event = mockEvents.find(e => e.id === booking.event_id);
               const items = mockBookingItems.filter(item => item.booking_id === booking.id);
               const eventDate = event ? new Date(event.start_time) : new Date();
-              
+
               return (
                 <div
                   key={booking.id}
@@ -145,7 +143,7 @@ export function MyTicketsPage() {
                         if (isAuthenticated) {
                           setSelectedTicket(booking.id);
                         } else {
-                          setShowLoginModal(true);
+                          login();
                         }
                       }}
                       className="w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all hover:shadow-lg flex items-center justify-center gap-2"
@@ -180,64 +178,52 @@ export function MyTicketsPage() {
 
         {/* QR Code Modal */}
         {selectedTicket && (
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setSelectedTicket(null)}
+          >
             <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-              onClick={() => setSelectedTicket(null)}
+              className="bg-white rounded-2xl max-w-md w-full p-8"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div
-                className="bg-white rounded-2xl max-w-md w-full p-8"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-slate-800">Mã QR vé</h3>
-                  <button
-                    onClick={() => setSelectedTicket(null)}
-                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-slate-800">Mã QR vé</h3>
+                <button
+                  onClick={() => setSelectedTicket(null)}
+                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
 
-                <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-8 mb-6">
-                  <div className="bg-white p-4 rounded-lg shadow-lg">
-                    {/* Placeholder for QR Code - In real app use a library */}
-                    <div className="w-full aspect-square bg-slate-100 rounded-lg flex items-center justify-center">
-                      <QrCode className="w-32 h-32 text-slate-400" />
-                    </div>
+              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-8 mb-6">
+                <div className="bg-white p-4 rounded-lg shadow-lg">
+                  {/* Placeholder for QR Code - In real app use a library */}
+                  <div className="w-full aspect-square bg-slate-100 rounded-lg flex items-center justify-center">
+                    <QrCode className="w-32 h-32 text-slate-400" />
                   </div>
                 </div>
+              </div>
 
-                <div className="text-center space-y-2">
-                  <p className="text-slate-600">
-                    Vui lòng xuất trình mã QR này tại cổng
-                  </p>
-                  <p className="font-mono font-bold text-cyan-600 text-lg">
-                    {selectedTicket.substring(0, 8).toUpperCase()}
-                  </p>
-                </div>
+              <div className="text-center space-y-2">
+                <p className="text-slate-600">
+                  Vui lòng xuất trình mã QR này tại cổng
+                </p>
+                <p className="font-mono font-bold text-cyan-600 text-lg">
+                  {selectedTicket.substring(0, 8).toUpperCase()}
+                </p>
+              </div>
 
-                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-sm text-yellow-800 text-center">
-                    ⚠️ Tăng độ sáng màn hình để máy quét dễ đọc mã
-                  </p>
-                </div>
+              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800 text-center">
+                  ⚠️ Tăng độ sáng màn hình để máy quét dễ đọc mã
+                </p>
               </div>
             </div>
-          )}
-          
-          {showLoginModal && (
-            <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-              onClick={() => setShowLoginModal(false)}
-            >
-              <div
-                className="bg-white rounded-2xl max-w-md w-full p-8"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <LoginPage />
-              </div>
-            </div>
-          )}
+          </div>
+        )}
+
+
       </div>
     </div>
   );

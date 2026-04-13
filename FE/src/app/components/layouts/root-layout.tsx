@@ -6,7 +6,7 @@ import { useState } from "react";
 export function RootLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, login } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
@@ -17,7 +17,7 @@ export function RootLayout() {
   const handleLogout = () => {
     logout();
     setShowLogoutConfirm(false);
-    navigate("/login");
+    navigate("/");
   };
 
   return (
@@ -115,8 +115,8 @@ export function RootLayout() {
                   )}
                 </div>
               ) : (
-                <Link
-                  to="/login"
+                <button
+                  onClick={() => login()}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                     isActive('/login') 
                       ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white' 
@@ -125,7 +125,7 @@ export function RootLayout() {
                 >
                   <User className="w-4 h-4" />
                   <span>Đăng nhập</span>
-                </Link>
+                </button>
               )}
             </nav>
 
@@ -145,12 +145,12 @@ export function RootLayout() {
                   <LogOut className="w-5 h-5" />
                 </button>
               ) : (
-                <Link
-                  to="/login"
+                <button
+                  onClick={() => login()}
                   className="p-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
                 >
                   <LogIn className="w-5 h-5" />
-                </Link>
+                </button>
               )}
             </div>
           </div>
