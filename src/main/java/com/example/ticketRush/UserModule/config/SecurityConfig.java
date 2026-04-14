@@ -16,7 +16,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
     private final CustomOidcUserService oidcUserService;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CorsConfigurationSource corsConfigurationSource;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
@@ -25,12 +24,10 @@ public class SecurityConfig {
 
     public SecurityConfig(
             CustomOidcUserService oidcUserService,
-            JwtAuthenticationFilter jwtAuthenticationFilter,
             CorsConfigurationSource corsConfigurationSource,
             OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler
     ) {
         this.oidcUserService = oidcUserService;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.corsConfigurationSource = corsConfigurationSource;
         this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
     }
@@ -45,16 +42,16 @@ public class SecurityConfig {
                 // ── CSRF: disable cho stateless REST API ─────────────────
                 .csrf(csrf -> csrf.disable())
 
-                // ── Session: stateless (SPA dùng JWT, không cần session) ─
+                // OAuth2 authorization code cần session trong request callback
+                // để lưu OAuth2AuthorizationRequest / AuthorizedClient; SPA vẫn dùng JWT sau redirect.
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
 
                 // ── Authorization Rules ──────────────────────────────────
                 .authorizeHttpRequests(auth -> auth
                         // Public – Auth endpoints
                         .requestMatchers(
-                                "/api/auth/login",
                                 "/api/auth/register",
                                 "/api/auth/refresh"
                         ).permitAll()
@@ -89,10 +86,7 @@ public class SecurityConfig {
                                 .oidcUserService(oidcUserService)
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
-                )
-
-                // ── JWT Filter (cho REST API calls) ──────────────────────
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                );
 
         return http.build();
     }
