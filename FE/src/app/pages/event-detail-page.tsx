@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { MapPin, Calendar, Clock, ArrowLeft, Info, Armchair } from "lucide-react";
-import { mockEvents, mockZones, generateSeats } from "../data/mock-data";
+import { mockEvents, mockZones, generateSeats } from "../data/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { SeatSelector } from "../components/seat-selector";
@@ -107,7 +107,7 @@ export function EventDetailPage() {
                   <div 
                     key={zone.id}
                     className="border-2 rounded-xl p-4 hover:border-cyan-500 transition-colors"
-                    style={{ borderColor: zone.available === 0 ? '#e2e8f0' : zone.color_hex + '40' }}
+                    style={{ borderColor: (zone.available ?? 1) === 0 ? '#e2e8f0' : zone.color_hex + '40' }}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
@@ -117,17 +117,12 @@ export function EventDetailPage() {
                         ></div>
                         <h3 className="font-bold text-slate-800">{zone.name}</h3>
                       </div>
-                      {zone.available === 0 && (
-                        <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
-                          Hết vé
-                        </span>
-                      )}
                     </div>
                     <p className="text-2xl font-bold text-cyan-600 mb-2">
                       {zone.base_price.toLocaleString('vi-VN')}đ
                     </p>
                     <p className="text-sm text-slate-500">
-                      Còn {zone.available}/{zone.capacity} ghế
+                      Sức chứa: {zone.capacity} ghế
                     </p>
                   </div>
                 ))}
@@ -182,7 +177,7 @@ export function EventDetailPage() {
                             {zone?.name} - Ghế {seat.row_label}{seat.seat_number}
                           </span>
                           <span className="font-semibold">
-                            {seat.price.toLocaleString('vi-VN')}đ
+                            {zone ? zone.base_price.toLocaleString('vi-VN') : 0}đ
                           </span>
                         </div>
                       );
@@ -198,10 +193,12 @@ export function EventDetailPage() {
                             generateSeats(zone.id, 5, 10).filter(s => s.id === seatId)
                           );
                           const seat = allSeats[0];
-                          return sum + (seat?.price || 0);
+                          const zone = zones.find(z => z.id === seat?.zone_id);
+                          return sum + (zone?.base_price || 0);
                         }, 0)).toLocaleString('vi-VN')}đ
                       </span>
                     </div>
+
                     
                     <button
                       onClick={handleProceedToCheckout}

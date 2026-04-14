@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Zone, generateSeats, Seat } from "../data/mock-data";
+import { generateSeats } from "../data/utils";
+import { Zone, Seat } from "../types";
 import { Armchair, X } from "lucide-react";
 
 interface SeatSelectorProps {
@@ -49,11 +50,11 @@ export function SeatSelector({ zones, selectedSeats, onSeatsChange }: SeatSelect
           <button
             key={z.id}
             onClick={() => setSelectedZone(z.id)}
-            disabled={z.available === 0}
+            disabled={(z.available ?? 1) === 0}
             className={`px-4 py-2 rounded-lg whitespace-nowrap transition-all flex items-center gap-2 ${
               selectedZone === z.id
                 ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg'
-                : z.available === 0
+                : (z.available ?? 1) === 0
                 ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 : 'bg-white border-2 border-slate-200 text-slate-700 hover:border-cyan-500'
             }`}

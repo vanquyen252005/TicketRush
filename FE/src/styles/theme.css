@@ -178,4 +178,11 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+
+  /* Admin View Overrides to fix white space */
+  .admin-view .container {
+    max-width: 95% !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
 }

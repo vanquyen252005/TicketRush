@@ -1,5 +1,5 @@
 import { apiFetch } from "../api-client";
-import { Event } from "../data/mock-data";
+import { Event } from "../data/utils";
 
 export const eventService = {
   getAllEvents: async (): Promise<Event[]> => {

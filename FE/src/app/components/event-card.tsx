@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { MapPin, Calendar, Clock } from "lucide-react";
-import { Event } from "../data/mock-data";
+import { Event } from "../types";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 
@@ -39,7 +39,10 @@ export function EventCard({ event }: EventCardProps) {
   const eventDate = new Date(event.start_time);
 
   return (
-    <div className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+    <Link 
+      to={`/event/${event.id}`}
+      className="block group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden hover:scale-[1.02] active:scale-95 cursor-pointer border border-slate-100"
+    >
       {/* Event Image */}
       <div className="relative aspect-[16/9] overflow-hidden">
         <img 
@@ -64,7 +67,7 @@ export function EventCard({ event }: EventCardProps) {
 
       {/* Event Info */}
       <div className="p-6">
-        <h3 className="text-xl font-bold text-slate-800 mb-3 line-clamp-2 min-h-[3.5rem]">
+        <h3 className="text-xl font-bold text-slate-800 mb-3 line-clamp-2 min-h-[3.5rem] group-hover:text-cyan-600 transition-colors">
           {event.name}
         </h3>
 
@@ -83,23 +86,17 @@ export function EventCard({ event }: EventCardProps) {
           </div>
         </div>
 
-        {/* CTA Button */}
+        {/* CTA Button (Styled as div since parent is a Link) */}
         {isDisabled ? (
-          <button 
-            disabled
-            className="w-full py-3 px-4 rounded-xl bg-slate-200 text-slate-500 cursor-not-allowed"
-          >
+          <div className="w-full py-3 px-4 rounded-xl bg-slate-200 text-slate-500 text-center font-bold">
             {event.status === 'SOLD_OUT' ? 'Đã hết vé' : 'Chưa mở bán'}
-          </button>
+          </div>
         ) : (
-          <Link
-            to={`/event/${event.id}`}
-            className="block w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-center hover:from-cyan-700 hover:to-blue-700 transition-all hover:shadow-lg"
-          >
+          <div className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-center font-bold group-hover:from-cyan-700 group-hover:to-blue-700 transition-all shadow-md group-hover:shadow-lg">
             Đặt vé ngay
-          </Link>
+          </div>
         )}
       </div>
-    </div>
+    </Link>
   );
 }

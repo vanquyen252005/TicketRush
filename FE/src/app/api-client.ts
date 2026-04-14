@@ -1,14 +1,22 @@
+import keycloak from "./keycloak";
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3300';
 
 export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
   
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  };
+
+  if (keycloak.token) {
+    (headers as any)['Authorization'] = `Bearer ${keycloak.token}`;
+  }
+
   const response = await fetch(url, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
   });
 
   if (!response.ok) {

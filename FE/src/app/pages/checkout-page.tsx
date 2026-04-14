@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { Clock, CreditCard, MapPin, Calendar, CheckCircle2 } from "lucide-react";
-import { mockEvents, mockZones, generateSeats } from "../data/mock-data";
+import { mockEvents, mockZones, generateSeats } from "../data/utils";
 
 export function CheckoutPage() {
   const navigate = useNavigate();
@@ -47,7 +47,10 @@ export function CheckoutPage() {
   const zones = mockZones.filter(z => z.event_id === eventId);
   const allSeats = zones.flatMap(zone => generateSeats(zone.id, 5, 10));
   const selectedSeats = allSeats.filter(s => seatIds.includes(s.id));
-  const totalAmount = selectedSeats.reduce((sum, seat) => sum + seat.price, 0);
+  const totalAmount = selectedSeats.reduce((sum, seat) => {
+    const zone = zones.find(z => z.id === seat.zone_id);
+    return sum + (zone?.base_price || 0);
+  }, 0);
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
@@ -149,7 +152,7 @@ export function CheckoutPage() {
                           </span>
                         </div>
                         <span className="font-bold text-cyan-600">
-                          {seat.price.toLocaleString('vi-VN')}đ
+                          {zone?.base_price.toLocaleString('vi-VN')}đ
                         </span>
                       </div>
                     );
