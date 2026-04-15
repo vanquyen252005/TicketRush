@@ -32,12 +32,9 @@
     <div class="card">
         <div class="left">
             <h1>Đăng nhập TicketRush</h1>
-            <p>Chọn đăng nhập bằng Google (qua Keycloak) hoặc đăng nhập user nội bộ bằng username/email + password.</p>
+            <p>Đăng nhập user nội bộ bằng username/email + password.</p>
 
             <div class="row">
-                <a class="btn google" th:href="@{/oauth2/authorization/ticketRush}">
-                    Đăng nhập bằng Google (Keycloak)
-                </a>
                 <a class="btn" th:href="@{/logout}">
                     Logout
                 </a>
@@ -45,7 +42,7 @@
 
             <div class="divider"></div>
 
-            <p><b>Gợi ý:</b> Nếu bạn đã cấu hình Google Identity Provider trong Keycloak Realm, nút trên sẽ tự hiển thị “Login with Google” ở màn Keycloak.</p>
+            <p><b>Gợi ý:</b> OAuth2/Keycloak hiện đang tắt bằng `app.security.oauth2.enabled=false`.</p>
         </div>
 
         <div class="right">
@@ -74,4 +71,3 @@
 </div>
 </body>
 </html>
-

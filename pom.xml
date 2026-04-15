@@ -95,8 +95,7 @@
 			<artifactId>spring-modulith-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
-		<!-- Swagger / OpenAPI 3 – springdoc v2.x dành cho Spring Boot 3/4 -->
+<!--Add swagger-->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>

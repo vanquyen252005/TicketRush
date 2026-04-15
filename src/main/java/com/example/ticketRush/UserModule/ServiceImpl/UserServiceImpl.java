@@ -17,7 +17,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void findOrCreateUserFromKeycloak(String keycloakSubjectId, String username, String email, String fullName, Role role) {
-        // Hiện DB chưa có cột keycloakSubjectId, nên mình dùng email/username để "upsert" tối thiểu.
+        // User login bằng Keycloak vẫn cần một bản ghi local để booking/payment và các quan hệ DB sử dụng.
+        // Hiện tại DB chưa có cột keycloakSubjectId, nên tạm thời upsert theo email/username.
         userRepository.findByEmailIgnoreCase(email).ifPresentOrElse(existing -> {
             boolean changed = false;
             if (existing.getUsername() == null && username != null && !username.isBlank()) {
@@ -43,7 +44,8 @@ public class UserServiceImpl implements UserService {
             User user = User.builder()
                     .email(email)
                     .username(username)
-                    .password(null) // user OAuth2 không dùng password nội bộ
+                    // User đi từ Keycloak/OAuth2 nên không có password local.
+                    .password(null)
                     .fullName((fullName == null || fullName.isBlank()) ? email : fullName)
                     .role(role == null ? Role.ROLE_USER : role)
                     .status(UserStatus.ACTIVE)
@@ -57,4 +59,3 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmailIgnoreCaseOrUsernameIgnoreCase(identifier, identifier);
     }
 }
-

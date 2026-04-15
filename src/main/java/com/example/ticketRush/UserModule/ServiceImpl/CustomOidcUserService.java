@@ -40,16 +40,16 @@ public class CustomOidcUserService extends OidcUserService {
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
-        OidcUser defaultUser =  super.loadUser(userRequest);
+        // B1: để Spring lấy OIDC user mặc định từ Keycloak trước.
+        OidcUser defaultUser = super.loadUser(userRequest);
 
-        // Get the access token
+        // B2: lấy access token để đọc thêm roles trong claims của Keycloak.
         String accessToken = userRequest.getAccessToken().getTokenValue();
 
-        // Extract the role
+        // B3: chuyển roles của Keycloak thành GrantedAuthority cho Spring Security.
         Set<GrantedAuthority> keycloakRoles = extractKeycloakRoles(accessToken);
         keycloakRoles.addAll(defaultUser.getAuthorities());
 
-        // Kiểm tra và tạo user trong database nếu chưa tồn tại
         try {
             String username = defaultUser.getPreferredUsername() != null
                     ? defaultUser.getPreferredUsername()
@@ -58,15 +58,16 @@ public class CustomOidcUserService extends OidcUserService {
             String fullname = defaultUser.getFullName() != null
                     ? defaultUser.getFullName()
                     : defaultUser.getName();
-            // Xác định role từ Keycloak roles
+
+            // Map roles trong token Keycloak sang enum Role nội bộ.
             Role role = determineRoleFromAuthorities(keycloakRoles);
 
-            // Kiểm tra và tạo user nếu chưa tồn tại
+            // Đồng bộ user Keycloak vào DB local để các module nghiệp vụ vẫn dùng User entity nội bộ.
             userService.findOrCreateUserFromKeycloak(defaultUser.getSubject(), username, email, fullname, role);
             logger.info("Đã xử lý user từ Keycloak với email: {}", email);
         } catch (Exception e) {
             logger.error("Lỗi khi xử lý user từ Keycloak: {}", e.getMessage(), e);
-            // Không throw exception để không làm gián đoạn quá trình đăng nhập
+            // Không throw để tránh làm gián đoạn toàn bộ login flow.
         }
 
         return new DefaultOidcUser(
@@ -74,17 +75,15 @@ public class CustomOidcUserService extends OidcUserService {
                 defaultUser.getIdToken(),
                 defaultUser.getUserInfo()
         );
-
-
     }
 
     private Set<GrantedAuthority> extractKeycloakRoles(String accessToken) {
-        // Decode the access token
+        // Decode access token của Keycloak để đọc claims role.
         Jwt jwt = jwtDecoder.decode(accessToken);
 
         Set<String> roles = new HashSet<>();
 
-        // 1) Realm roles: realm_access.roles (phù hợp với bạn đang tạo realm_role)
+        // Realm roles: role gán ở cấp realm trong Keycloak.
         @SuppressWarnings("unchecked")
         Map<String, Object> realmAccess = (Map<String, Object>) jwt.getClaim("realm_access");
         if (realmAccess != null) {
@@ -95,7 +94,7 @@ public class CustomOidcUserService extends OidcUserService {
             }
         }
 
-        // 2) Client roles: resource_access[clientId].roles (giữ lại cho trường hợp bạn dùng client role)
+        // Client roles: role gán riêng cho client "ticketRush" trong Keycloak.
         @SuppressWarnings("unchecked")
         Map<String, Object> resourceAccess = (Map<String, Object>) jwt.getClaim("resource_access");
         if (resourceAccess != null) {
@@ -114,7 +113,7 @@ public class CustomOidcUserService extends OidcUserService {
             return Collections.emptySet();
         }
 
-        // Normalize tránh ROLE_ROLE_ADMIN nếu Keycloak đã đặt tên role là ROLE_ADMIN
+        // Chuẩn hóa về ROLE_* để hasRole()/hasAuthority() của Spring Security dùng thống nhất.
         return roles.stream()
                 .map(String::trim)
                 .filter(r -> !r.isBlank())
@@ -122,11 +121,10 @@ public class CustomOidcUserService extends OidcUserService {
                 .map(String::toUpperCase)
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
-
     }
 
     private Role determineRoleFromAuthorities(Set<GrantedAuthority> authorities) {
-        // Ưu tiên ADMIN, còn lại mặc định USER
+        // Nếu token Keycloak có ADMIN thì ưu tiên ADMIN, còn lại fallback về USER.
         for (GrantedAuthority authority : authorities) {
             if ("ROLE_ADMIN".equals(authority.getAuthority())) {
                 return Role.ROLE_ADMIN;
