@@ -1,36 +1,28 @@
-import { apiFetch } from "../api-client";
+import apiClient from "../api-client";
 import { User, AuthResponse, RegisterData, LoginData } from "../types";
 
 export const authService = {
   register: async (data: RegisterData): Promise<{ message: string }> => {
-    return apiFetch<{ message: string }>("/api/auth/register", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    const response = await apiClient.post<{ message: string }>("/api/auth/register", data);
+    return response.data;
   },
 
   login: async (data: LoginData): Promise<AuthResponse> => {
-    return apiFetch<AuthResponse>("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    const response = await apiClient.post<AuthResponse>("/api/auth/login", data);
+    return response.data;
   },
 
   logout: async (): Promise<void> => {
-    return apiFetch<void>("/api/auth/logout", {
-      method: "POST"
-    });
+    await apiClient.post("/api/auth/logout");
   },
 
   getCurrentUser: async (): Promise<User> => {
-    return apiFetch<User>("/api/auth/me");
+    const response = await apiClient.get<User>("/api/auth/me");
+    return response.data;
   },
 
   loginWithGoogle: async (idToken: string): Promise<AuthResponse> => {
-    return apiFetch<AuthResponse>("/api/auth/google", {
-      method: "POST",
-      body: JSON.stringify({ idToken }),
-    });
+    const response = await apiClient.post<AuthResponse>("/api/auth/google", { idToken });
+    return response.data;
   }
 };
-
