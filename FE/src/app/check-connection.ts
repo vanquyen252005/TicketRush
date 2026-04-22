@@ -12,15 +12,20 @@ export const checkBackendConnection = async (): Promise<{ success: boolean; mess
     // Nếu server có phản hồi (bất kể status code nào, miễn là không phải lỗi mạng)
     // thì nghĩa là đã kết nối được tới Backend.
     const duration = Date.now() - start;
+    // Bất kỳ phản hồi nào từ server (kể cả 404) đều chứng minh server đang chạy
+    const isActuallySuccess = response.status < 500; 
     return {
       success: true,
-      message: `Kết nối thành công tới Backend (Status: ${response.status}, Phản hồi: ${duration}ms)`
+      message: isActuallySuccess 
+        ? `Đã kết nối tới Backend (${duration}ms)` 
+        : `Backend phản hồi lỗi (Status: ${response.status}, ${duration}ms)`
     };
   } catch (error: any) {
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8082';
     console.error("Backend Connection Error:", error);
     return {
       success: false,
-      message: `Không thể kết nối tới Backend: ${error.message}. Hãy đảm bảo server đang chạy ở cổng 8082 và CORS đã được cấu hình.`
+      message: `Không thể kết nối tới Backend tại ${apiUrl}: ${error.message}. Hãy đảm bảo server đang chạy và CORS đã được cấu hình.`
     };
   }
 };

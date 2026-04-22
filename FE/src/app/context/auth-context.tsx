@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useCallback, useRef } from 'react';
 import keycloak from '../keycloak';
 import { User } from '../types';
+import { toast } from 'sonner';
 
 export interface AuthContextType {
   user: User | null;
@@ -44,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const roles = keycloak.tokenParsed?.realm_access?.roles || [];
           const userRole = roles.includes('ADMIN') ? 'ADMIN' : (roles.includes('ORGANIZER') ? 'ORGANIZER' : 'CUSTOMER');
 
-          setUser({
+          const newUser = {
             id: profile.id || "",
             email: profile.email || "",
             full_name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.username || "User",
@@ -52,20 +53,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             status: 'ACTIVE',
             auth_provider: 'LOCAL', // Or maybe 'KEYCLOAK' if we add it to type
             phone_number: '', // Can be mapped if configured in Keycloak
-          } as User);
+          } as User;
+
+          setUser(newUser);
+          
+          toast.success(`Đăng nhập thành công! Chào mừng ${newUser.full_name}`, {
+            id: 'login-success',
+          });
         }
 
         setIsInitialized(true);
         setIsLoading(false);
       } catch (error: any) {
         console.error("Keycloak initialization failed:", error);
-        // Show an alert to help debug why authentication isn't persisting
-        if (error?.error === 'access_denied') {
-             console.error('Access denied');
-        } else {
-             // alert(`Keycloak Error: Cân nhắc mở F12 xem phần Console hoặc tab Network. Lỗi: ${error?.message || error?.error || JSON.stringify(error)}`);
-             console.error(error);
+        
+        // Hiện lỗi chi tiết lên màn hình để dễ bắt bệnh
+        const errorMsg = error?.error || error?.message || JSON.stringify(error);
+        if (errorMsg !== 'undefined' && errorMsg !== '{}') {
+          toast.error(`Lỗi khởi tạo đăng nhập (Keycloak): ${errorMsg}`, {
+            description: "Hãy kiểm tra lại Client ID và Realm trong file .env",
+            duration: 10000,
+          });
         }
+        
         setIsInitialized(true);
         setIsLoading(false);
       }
@@ -92,9 +102,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isInitialized]);
 
-  const login = useCallback(() => {
-    keycloak.login({ redirectUri: window.location.origin + "/" });
-  }, []);
+  const login = useCallback(async () => {
+    try {
+      if (!isInitialized) {
+        toast.error("Hệ thống đăng nhập đang khởi tạo, vui lòng đợi giây lát...");
+        return;
+      }
+      toast.loading("Đang chuyển hướng tới trang đăng nhập...", { id: 'login-loading' });
+      await keycloak.login({ redirectUri: window.location.origin + "/" });
+    } catch (error: any) {
+      console.error("Login failed:", error);
+      toast.dismiss('login-loading');
+      toast.error(`Không thể mở trang đăng nhập: ${error.message || 'Lỗi không xác định'}`);
+    }
+  }, [isInitialized]);
 
   const logout = useCallback(() => {
     keycloak.logout({ redirectUri: window.location.origin + "/" });

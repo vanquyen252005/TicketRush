@@ -6,7 +6,7 @@ import { useState } from "react";
 export function RootLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout, login } = useAuth();
+  const { user, isAuthenticated, logout, login, isInitialized } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
@@ -117,14 +117,15 @@ export function RootLayout() {
               ) : (
                 <button
                   onClick={() => login()}
+                  disabled={!isInitialized}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                    isActive('/login') 
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white' 
+                    !isInitialized 
+                      ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
                       : 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600'
                   }`}
                 >
                   <User className="w-4 h-4" />
-                  <span>Đăng nhập</span>
+                  <span>{isInitialized ? 'Đăng nhập' : 'Đang tải...'}</span>
                 </button>
               )}
             </nav>
@@ -138,16 +139,24 @@ export function RootLayout() {
                 <Ticket className="w-5 h-5" />
               </Link>
               {isAuthenticated ? (
-                <button
-                  onClick={() => setShowLogoutConfirm(true)}
-                  className="p-2 rounded-lg text-red-600 hover:bg-red-50"
-                >
-                  <LogOut className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded-md max-w-[70px] truncate">
+                    {user?.full_name.split(' ').pop()}
+                  </span>
+                  <button
+                    onClick={() => setShowLogoutConfirm(true)}
+                    className="p-2 rounded-lg text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
+                </div>
               ) : (
                 <button
                   onClick={() => login()}
-                  className="p-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
+                  disabled={!isInitialized}
+                  className={`p-2 rounded-lg transition-colors ${
+                    !isInitialized ? 'bg-slate-200 text-slate-400' : 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
+                  }`}
                 >
                   <LogIn className="w-5 h-5" />
                 </button>
