@@ -1,15 +1,22 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import { Ticket, Home, User, LogIn, LogOut, ChevronDown, AlertCircle } from "lucide-react";
 import { useAuth } from "../../hooks/use-auth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function RootLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout, login, isInitialized } = useAuth();
+  const { user, isAuthenticated, logout, login, isInitialized, isAdmin } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
+  // Tự động chuyển hướng Admin vào trang quản trị khi đăng nhập thành công
+  useEffect(() => {
+    if (isInitialized && isAuthenticated && isAdmin && location.pathname === "/") {
+      navigate("/admin");
+    }
+  }, [isInitialized, isAuthenticated, isAdmin, location.pathname, navigate]);
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };
