@@ -34,7 +34,7 @@ public class Zone {
     // Sử dụng tính năng mới của Hibernate 6 (Spring Boot 3) để map trực tiếp ra kiểu JSONB trong PostgreSQL/MySQL
     // Lưu trữ tọa độ, hình dạng SVG của khu vực để Frontend render
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "layout_metadata", columnDefinition = "jsonb")
+    @Column(name = "layout_metadata")
     private String layoutMetadata;
     // 1 Zone -> N Seats
     @OneToMany(mappedBy = "zone", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
