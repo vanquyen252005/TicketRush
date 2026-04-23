@@ -1,0 +1,272 @@
+[
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440001",
+    "user_id": "c430252c-7334-406a-935f-331e3d641001",
+    "event_id": 1,
+    "total_amount": 10000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-06-15T18:00:00Z",
+    "created_at": "2026-06-01T10:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440002",
+    "user_id": "c430252c-7334-406a-935f-331e3d641002",
+    "event_id": 2,
+    "total_amount": 9000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-05-10T19:00:00Z",
+    "created_at": "2026-05-01T15:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440003",
+    "user_id": "c430252c-7334-406a-935f-331e3d641003",
+    "event_id": 3,
+    "total_amount": 2400000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-05-20T19:00:00Z",
+    "created_at": "2026-05-05T09:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440004",
+    "user_id": "c430252c-7334-406a-935f-331e3d641004",
+    "event_id": 9,
+    "total_amount": 4000000,
+    "status": "PENDING",
+    "expires_at": "2026-10-10T08:00:00Z",
+    "created_at": "2026-09-25T10:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440005",
+    "user_id": "c430252c-7334-406a-935f-331e3d641005",
+    "event_id": 11,
+    "total_amount": 10000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-07-05T18:00:00Z",
+    "created_at": "2026-06-25T14:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440006",
+    "user_id": "c430252c-7334-406a-935f-331e3d641006",
+    "event_id": 12,
+    "total_amount": 1200000,
+    "status": "CANCELLED",
+    "expires_at": "2026-06-01T17:00:00Z",
+    "created_at": "2026-05-15T08:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440007",
+    "user_id": "c430252c-7334-406a-935f-331e3d641007",
+    "event_id": 14,
+    "total_amount": 1000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-05-30T09:00:00Z",
+    "created_at": "2026-05-10T19:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440008",
+    "user_id": "c430252c-7334-406a-935f-331e3d641008",
+    "event_id": 18,
+    "total_amount": 3000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-04-30T20:00:00Z",
+    "created_at": "2026-04-15T07:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440009",
+    "user_id": "c430252c-7334-406a-935f-331e3d641009",
+    "event_id": 21,
+    "total_amount": 2000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-05-25T19:00:00Z",
+    "created_at": "2026-05-10T14:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440010",
+    "user_id": "c430252c-7334-406a-935f-331e3d641010",
+    "event_id": 24,
+    "total_amount": 1600000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-05-30T16:00:00Z",
+    "created_at": "2026-05-20T19:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440011",
+    "user_id": "c430252c-7334-406a-935f-331e3d641011",
+    "event_id": 1,
+    "total_amount": 3000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-06-15T18:00:00Z",
+    "created_at": "2026-06-05T09:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440012",
+    "user_id": "c430252c-7334-406a-935f-331e3d641012",
+    "event_id": 2,
+    "total_amount": 3600000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-05-10T19:00:00Z",
+    "created_at": "2026-05-02T10:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440013",
+    "user_id": "c430252c-7334-406a-935f-331e3d641013",
+    "event_id": 3,
+    "total_amount": 1200000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-05-20T19:00:00Z",
+    "created_at": "2026-05-10T11:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440014",
+    "user_id": "c430252c-7334-406a-935f-331e3d641014",
+    "event_id": 4,
+    "total_amount": 1000000,
+    "status": "PENDING",
+    "expires_at": "2026-07-10T18:00:00Z",
+    "created_at": "2026-07-01T14:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440015",
+    "user_id": "c430252c-7334-406a-935f-331e3d641015",
+    "event_id": 5,
+    "total_amount": 9000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-08-15T18:30:00Z",
+    "created_at": "2026-08-01T08:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440016",
+    "user_id": "c430252c-7334-406a-935f-331e3d641016",
+    "event_id": 6,
+    "total_amount": 500000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-04-20T05:00:00Z",
+    "created_at": "2026-04-05T14:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440017",
+    "user_id": "c430252c-7334-406a-935f-331e3d641017",
+    "event_id": 7,
+    "total_amount": 6000000,
+    "status": "PENDING",
+    "expires_at": "2026-09-01T19:00:00Z",
+    "created_at": "2026-08-20T20:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440018",
+    "user_id": "c430252c-7334-406a-935f-331e3d641018",
+    "event_id": 8,
+    "total_amount": 10000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-12-25T19:00:00Z",
+    "created_at": "2026-12-01T13:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440019",
+    "user_id": "c430252c-7334-406a-935f-331e3d641019",
+    "event_id": 9,
+    "total_amount": 2000000,
+    "status": "CANCELLED",
+    "expires_at": "2026-10-10T08:00:00Z",
+    "created_at": "2026-09-15T18:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440020",
+    "user_id": "c430252c-7334-406a-935f-331e3d641020",
+    "event_id": 10,
+    "total_amount": 4000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-11-20T19:00:00Z",
+    "created_at": "2026-11-01T19:30:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440021",
+    "user_id": "c430252c-7334-406a-935f-331e3d641021",
+    "event_id": 11,
+    "total_amount": 5000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-07-05T18:00:00Z",
+    "created_at": "2026-06-20T08:30:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440022",
+    "user_id": "c430252c-7334-406a-935f-331e3d641022",
+    "event_id": 12,
+    "total_amount": 450000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-06-01T17:00:00Z",
+    "created_at": "2026-05-20T10:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440023",
+    "user_id": "c430252c-7334-406a-935f-331e3d641023",
+    "event_id": 13,
+    "total_amount": 3500000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-11-15T19:00:00Z",
+    "created_at": "2026-11-01T18:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440024",
+    "user_id": "c430252c-7334-406a-935f-331e3d641024",
+    "event_id": 14,
+    "total_amount": 500000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-05-30T09:00:00Z",
+    "created_at": "2026-05-15T07:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440025",
+    "user_id": "c430252c-7334-406a-935f-331e3d641025",
+    "event_id": 15,
+    "total_amount": 15000000,
+    "status": "PENDING",
+    "expires_at": "2026-11-11T18:00:00Z",
+    "created_at": "2026-11-01T19:30:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440026",
+    "user_id": "c430252c-7334-406a-935f-331e3d641001",
+    "event_id": 16,
+    "total_amount": 3500000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-09-20T19:00:00Z",
+    "created_at": "2026-09-01T14:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440027",
+    "user_id": "c430252c-7334-406a-935f-331e3d641002",
+    "event_id": 17,
+    "total_amount": 800000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-08-01T08:00:00Z",
+    "created_at": "2026-07-20T10:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440028",
+    "user_id": "c430252c-7334-406a-935f-331e3d641003",
+    "event_id": 18,
+    "total_amount": 1500000,
+    "status": "CANCELLED",
+    "expires_at": "2026-04-30T20:00:00Z",
+    "created_at": "2026-04-10T09:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440029",
+    "user_id": "c430252c-7334-406a-935f-331e3d641004",
+    "event_id": 19,
+    "total_amount": 4000000,
+    "status": "CONFIRMED",
+    "expires_at": "2026-10-15T18:00:00Z",
+    "created_at": "2026-10-01T10:00:00Z"
+  },
+  {
+    "id": "b50e8400-e29b-41d4-a716-446655440030",
+    "user_id": "c430252c-7334-406a-935f-331e3d641005",
+    "event_id": 20,
+    "total_amount": 12000000,
+    "status": "PENDING",
+    "expires_at": "2026-12-01T06:00:00Z",
+    "created_at": "2026-11-20T14:00:00Z"
+  }
+]

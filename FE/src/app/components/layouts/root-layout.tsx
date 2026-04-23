@@ -1,11 +1,30 @@
-import { Outlet, Link, useLocation } from "react-router";
-import { Ticket, Home, User, LogIn } from "lucide-react";
+import { Outlet, Link, useLocation, useNavigate } from "react-router";
+import { Ticket, Home, User, LogIn, LogOut, ChevronDown, AlertCircle } from "lucide-react";
+import { useAuth } from "../../hooks/use-auth";
+import { useState, useEffect } from "react";
 
 export function RootLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated, logout, login, isInitialized, isAdmin } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   
+  // Tự động chuyển hướng Admin vào trang quản trị khi đăng nhập thành công
+  useEffect(() => {
+    if (isInitialized && isAuthenticated && isAdmin && location.pathname === "/") {
+      navigate("/admin");
+    }
+  }, [isInitialized, isAuthenticated, isAdmin, location.pathname, navigate]);
+
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleLogout = () => {
+    logout();
+    setShowLogoutConfirm(false);
+    navigate("/");
   };
 
   return (
@@ -48,17 +67,74 @@ export function RootLayout() {
                 <Ticket className="w-4 h-4" />
                 <span>Vé của tôi</span>
               </Link>
-              <Link
-                to="/login"
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  isActive('/login') 
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white' 
-                    : 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600'
-                }`}
-              >
-                <User className="w-4 h-4" />
-                <span>Đăng nhập</span>
-              </Link>
+              {isAuthenticated ? (
+                <div className="relative">
+                    <button 
+                      onClick={() => setShowUserMenu(!showUserMenu)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-white transition-all"
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                        {user?.full_name ? user.full_name.charAt(0).toUpperCase() : '?'}
+                      </div>
+                      <span className="font-medium max-w-[100px] truncate">{user?.full_name || 'Người dùng'}</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
+                    </button>
+
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+                      <Link
+                        to="/profile"
+                        onClick={() => setShowUserMenu(false)}
+                        className="block px-4 py-3 border-b border-slate-50 mb-1 hover:bg-slate-50 transition-colors"
+                      >
+                        <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Tài khoản</p>
+                        <p className="text-sm font-bold text-slate-800 truncate">{user?.full_name}</p>
+                        <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+                      </Link>
+
+                      
+                      <div className="py-1">
+                        <Link
+                          to="/profile"
+                          onClick={() => setShowUserMenu(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-slate-700 hover:bg-slate-50 transition-colors text-sm font-medium"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                            <User className="w-4 h-4" />
+                          </div>
+                          <span>Thông tin cá nhân</span>
+                        </Link>
+                        
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            setShowLogoutConfirm(true);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-600">
+                            <LogOut className="w-4 h-4" />
+                          </div>
+                          <span>Đăng xuất</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => login()}
+                  disabled={!isInitialized}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                    !isInitialized 
+                      ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:from-cyan-600 hover:to-blue-600'
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  <span>{isInitialized ? 'Đăng nhập' : 'Đang tải...'}</span>
+                </button>
+              )}
             </nav>
 
             {/* Mobile Menu */}
@@ -69,16 +145,68 @@ export function RootLayout() {
               >
                 <Ticket className="w-5 h-5" />
               </Link>
-              <Link
-                to="/login"
-                className="p-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
-              >
-                <LogIn className="w-5 h-5" />
-              </Link>
+              {isAuthenticated ? (
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded-md max-w-[70px] truncate">
+                    {user?.full_name.split(' ').pop()}
+                  </span>
+                  <button
+                    onClick={() => setShowLogoutConfirm(true)}
+                    className="p-2 rounded-lg text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => login()}
+                  disabled={!isInitialized}
+                  className={`p-2 rounded-lg transition-colors ${
+                    !isInitialized ? 'bg-slate-200 text-slate-400' : 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
+                  }`}
+                >
+                  <LogIn className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
         </div>
       </header>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setShowLogoutConfirm(false)}
+          ></div>
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-300 border border-white/20">
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <AlertCircle className="w-10 h-10 text-red-500" />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-2">Đăng xuất</h3>
+              <p className="text-slate-500">
+                Bạn có chắc chắn muốn đăng xuất khỏi hệ thống không?
+              </p>
+            </div>
+            <div className="flex border-t border-slate-100">
+              <button 
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 px-6 py-4 text-slate-600 font-semibold hover:bg-slate-50 transition-colors border-r border-slate-100"
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={handleLogout}
+                className="flex-1 px-6 py-4 text-red-600 font-bold hover:bg-red-50 transition-colors"
+              >
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <main>

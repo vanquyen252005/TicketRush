@@ -1,25 +1,27 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9000";
+import axios from "axios";
+import keycloak from "./keycloak";
 
-export async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = `${API_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
-  const hasBody = options.body !== undefined && options.body !== null;
-  
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
-      ...options.headers,
-    },
-  });
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8082';
 
-  if (!response.ok) {
-    const errorBody = await response.text().catch(() => 'Unknown error');
-    throw new Error(`API Error (${response.status}): ${errorBody}`);
+// 🚀 BƯỚC 2: Cài đặt và thiết lập "Trạm trung chuyển" Axios
+const apiClient = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Interceptor: Tự động đính kèm Token Keycloak vào mọi request gửi đi
+apiClient.interceptors.request.use(
+  (config) => {
+    if (keycloak.token) {
+      config.headers.Authorization = `Bearer ${keycloak.token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
+);
 
-  if (response.status === 204) {
-    return undefined as T;
-  }
-
-  return response.json();
-}
+export default apiClient;

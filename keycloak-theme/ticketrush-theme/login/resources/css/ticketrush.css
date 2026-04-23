@@ -1,0 +1,278 @@
+/* ========================================================
+   TICKETRUSH THEME - MODERNIZED DESIGN
+   Mục tiêu: Bo góc mạnh mẽ, tối ưu khoảng cách, màu sắc chuyên nghiệp
+======================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+    --tr-primary: #1d4ed8;
+    /* Màu xanh chuyên nghiệp hơn, đậm hơn chút */
+    --tr-primary-hover: #1e3a8a;
+    --tr-bg: #f3f4f6;
+    /* Nền xám sáng sạch sẽ hơn */
+    --tr-card-bg: #ffffff;
+    --tr-text-main: #111827;
+    --tr-text-muted: #6b7280;
+    --tr-border: #e5e7eb;
+    --tr-input-bg: #f9fafb;
+    /* Nền ô input cực nhẹ */
+}
+
+/* --- RESET & BODY --- */
+html,
+body {
+    min-height: 100vh !important;
+    height: auto !important;
+    background-color: var(--tr-bg) !important;
+    background-image: none !important;
+    font-family: "Inter", sans-serif !important;
+    /* Dùng font Inter hiện đại và hỗ trợ tiếng Việt tốt */
+    margin: 0 !important;
+    padding: 0 !important;
+    color: var(--tr-text-main) !important;
+}
+
+body {
+    display: flex !important;
+    align-items: center !important;
+    /* Căn giữa màn hình */
+    justify-content: center !important;
+    padding: 40px 20px !important;
+    box-sizing: border-box !important;
+}
+
+/* --- CONTAINER CHÍNH & CARD --- */
+.pf-v5-c-login {
+    width: 100% !important;
+    max-width: 440px !important;
+    /* Rộng hơn một chút để thoáng form */
+    margin: 0 auto !important;
+}
+
+.pf-v5-c-login__container {
+    width: 100% !important;
+    background: var(--tr-card-bg) !important;
+    border-radius: 24px !important;
+    /* Tăng bo góc mạnh mẽ cho container */
+    padding: 40px !important;
+    /* Tăng khoảng cách trong thoáng form */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-sizing: border-box !important;
+}
+
+/* --- HEADER & LOGO --- */
+#kc-header {
+    width: 100% !important;
+    text-align: center !important;
+    margin-bottom: 30px !important;
+}
+
+#kc-header-wrapper {
+    font-size: 0 !important;
+    font-weight: 800 !important;
+    display: inline-block !important;
+}
+
+#kc-header-wrapper::before {
+    content: "Ticket";
+    font-size: 2.2rem;
+    color: var(--tr-primary);
+    letter-spacing: -1px;
+}
+
+#kc-header-wrapper::after {
+    content: "Rush";
+    font-size: 2.2rem;
+    color: #000000;
+    letter-spacing: -1px;
+}
+
+/* --- TIÊU ĐỀ TRANG --- */
+#kc-page-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    margin-bottom: 25px !important;
+    color: var(--tr-text-main) !important;
+}
+
+/* --- FORM ELEMENTS --- */
+.pf-v5-c-form__group {
+    margin-bottom: 18px !important;
+}
+
+.pf-v5-c-form__label {
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    color: var(--tr-text-main) !important;
+    margin-bottom: 6px !important;
+    display: inline-block !important;
+}
+
+/* Ô nhập liệu */
+.pf-v5-c-form-control {
+    border-radius: 12px !important;
+    /* Bo góc mạnh cho ô input */
+    border: 1px solid var(--tr-border) !important;
+    background-color: var(--tr-input-bg) !important;
+    padding: 12px 16px !important;
+    font-size: 1rem !important;
+    color: var(--tr-text-main) !important;
+    height: auto !important;
+    transition: all 0.2s ease !important;
+}
+
+.pf-v5-c-form-control:focus {
+    background-color: #ffffff !important;
+    border-color: var(--tr-primary) !important;
+    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.1) !important;
+}
+
+/* Nút hiển thị mật khẩu */
+.pf-v5-c-input-group__item .pf-v5-c-button {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 0 12px 12px 0 !important;
+    color: var(--tr-text-muted) !important;
+    padding: 0 16px !important;
+}
+
+.pf-v5-c-input-group__item .pf-v5-c-button:hover {
+    color: var(--tr-primary) !important;
+}
+
+/* Checkbox */
+.pf-v5-c-check {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.pf-v5-c-check__input {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+    accent-color: var(--tr-primary) !important;
+    cursor: pointer !important;
+}
+
+.pf-v5-c-check__label {
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    color: var(--tr-text-muted) !important;
+    cursor: pointer !important;
+}
+
+/* Dropdown */
+select.pf-v5-c-form-control {
+    appearance: none !important;
+}
+
+/* --- TIỆN ÍCH (REMEMBER ME & FORGOT PASSWORD) --- */
+.pf-v5-c-helper-text {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-top: 5px !important;
+}
+
+/* --- BUTTONS --- */
+.pf-v5-c-button.pf-m-primary,
+input[type="submit"] {
+    width: 100% !important;
+    background-color: var(--tr-primary) !important;
+    color: white !important;
+    padding: 14px !important;
+    border-radius: 14px !important;
+    /* Bo góc mạnh cho nút bấm */
+    border: none !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.pf-v5-c-button.pf-m-primary:hover,
+input[type="submit"]:hover {
+    background-color: var(--tr-primary-hover) !important;
+}
+
+/* Nút Google */
+.pf-v5-c-button.pf-m-secondary {
+    background-color: #f8fafc !important;
+    border: 1px solid var(--tr-border) !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    color: var(--tr-text-main) !important;
+    font-weight: 600 !important;
+    transition: all 0.2s !important;
+}
+
+.pf-v5-c-button.pf-m-secondary:hover {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* --- ĐĂNG KÝ MỚI & THÔNG TIN BỔ SUNG --- */
+#kc-registration-container {
+    margin-top: 25px !important;
+    text-align: center !important;
+    font-size: 0.95rem !important;
+    color: var(--tr-text-muted) !important;
+}
+
+#header-user-metadata {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: var(--tr-text-main) !important;
+    margin-top: 20px !important;
+    display: block !important;
+    border-bottom: 1px solid var(--tr-border) !important;
+    padding-bottom: 8px !important;
+}
+
+#description-user-metadata {
+    display: none !important;
+    /* Ẩn dòng chữ giải thích thừa thãi */
+}
+
+/* --- LIÊN KẾT QUAY LẠI --- */
+#back-to-home-link {
+    display: block;
+    text-align: center;
+    margin-top: 2.5rem;
+    color: #64748b;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+#back-to-home-link:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+#kc-form-options a[href*="authenticate"] {
+    display: block;
+    text-align: center;
+    margin-top: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: #1d4ed8;
+}
+
+#kc-form-options a:hover {
+    text-decoration: underline;
+}
+
+/* Ẩn dấu sao đỏ (*) mặc định vì làm form xấu đi */
+.pf-v5-c-form__label-required {
+    display: none !important;
+}
+
+/* Ẩn dòng "Required fields" */
+.pf-v5-u-mb-md-on-md .subtitle {
+    display: none !important;
+}
