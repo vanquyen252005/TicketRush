@@ -1,11 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShoppingBag, Search, Eye, CheckCircle, Clock, XCircle } from "lucide-react";
-import { mockBookings, mockEvents } from "../../data/utils";
+import { mockBookings } from "../../data/utils";
 import { BookingStatus } from "../../types";
+import { eventService } from "../../services/event-service";
 
 export function AdminOrdersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "ALL">("ALL");
+  const [events, setEvents] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const data = await eventService.getAllEvents();
+        setEvents(data);
+      } catch (error) {
+        console.error("Lỗi khi tải sự kiện:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
 
   const filteredBookings = mockBookings.filter(booking => {
     const matchesSearch = booking.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -79,8 +96,14 @@ export function AdminOrdersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredBookings.map((booking) => {
-                const event = mockEvents.find(e => e.id === booking.event_id);
+              {isLoading ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-slate-400 animate-pulse font-bold">
+                    Đang tải dữ liệu đơn hàng...
+                  </td>
+                </tr>
+              ) : filteredBookings.map((booking) => {
+                const event = events.find(e => e.id === booking.event_id);
                 return (
                   <tr key={booking.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="py-4 px-6">

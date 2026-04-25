@@ -5,8 +5,10 @@ import { eventService } from "../../services/event-service";
 import { Event, mockEvents } from "../../data/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { useAuth } from "../../hooks/use-auth";
 
 export function AdminEventsPage() {
+  const { isAdmin } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -124,16 +126,20 @@ export function AdminEventsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <button
-          onClick={() => {
-            setEditingEvent(null);
-            setShowCreateModal(true);
-          }}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all hover:shadow-lg"
-        >
-          <Plus className="w-5 h-5" />
-          <span>Tạo sự kiện mới</span>
-        </button>
+        {isAdmin ? (
+          <button
+            onClick={() => {
+              setEditingEvent(null);
+              setShowCreateModal(true);
+            }}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all hover:shadow-lg"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Tạo sự kiện mới</span>
+          </button>
+        ) : (
+          <h2 className="text-2xl font-bold text-slate-800">Danh sách sự kiện</h2>
+        )}
       </div>
 
       {/* Search Bar */}
@@ -222,21 +228,28 @@ export function AdminEventsPage() {
                       <Settings className="w-4 h-4" />
                       <span className="text-sm font-semibold">Sơ đồ ghế</span>
                     </Link>
-                    <button
-                      onClick={() => {
-                        setEditingEvent(event);
-                        setShowCreateModal(true);
-                      }}
-                      className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteEvent(event.id)}
-                      className="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    
+                    {isAdmin && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setEditingEvent(event);
+                            setShowCreateModal(true);
+                          }}
+                          className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                          title="Sửa sự kiện"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
+                          title="Xóa sự kiện"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

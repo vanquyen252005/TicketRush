@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { Clock, CreditCard, MapPin, Calendar, CheckCircle2 } from "lucide-react";
-import { mockEvents, mockZones, generateSeats } from "../data/utils";
+import { mockZones, generateSeats } from "../data/utils";
+import { eventService } from "../services/event-service";
 
 export function CheckoutPage() {
   const navigate = useNavigate();
@@ -11,6 +12,24 @@ export function CheckoutPage() {
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [event, setEvent] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch event
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        if (!eventId) return;
+        const data = await eventService.getEventById(Number(eventId));
+        setEvent(data);
+      } catch (error) {
+        console.error("Lỗi khi tải sự kiện:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchEvent();
+  }, [eventId]);
 
   // Countdown timer
   useEffect(() => {
@@ -27,7 +46,15 @@ export function CheckoutPage() {
     return () => clearInterval(timer);
   }, [timeLeft, navigate, eventId]);
 
-  if (!eventId || !seatIds || seatIds.length === 0) {
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <h2 className="text-2xl font-bold text-slate-800 animate-pulse">Đang tải thông tin thanh toán...</h2>
+      </div>
+    );
+  }
+
+  if (!eventId || !seatIds || seatIds.length === 0 || !event) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h2 className="text-2xl font-bold text-slate-800 mb-4">
@@ -43,7 +70,6 @@ export function CheckoutPage() {
     );
   }
 
-  const event = mockEvents.find(e => e.id === eventId);
   const zones = mockZones.filter(z => z.event_id === eventId);
   const allSeats = zones.flatMap(zone => generateSeats(zone.id, 5, 10));
   const selectedSeats = allSeats.filter(s => seatIds.includes(s.id));
@@ -127,7 +153,7 @@ export function CheckoutPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4" />
-                    <span>{new Date(event?.start_time || '').toLocaleDateString('vi-VN')}</span>
+                    <span>{new Date(event?.startTime || event?.start_time || '').toLocaleDateString('vi-VN')}</span>
                   </div>
                 </div>
               </div>

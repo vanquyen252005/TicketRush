@@ -36,7 +36,7 @@ export function EventCard({ event }: EventCardProps) {
   };
 
   const isDisabled = event.status === 'SOLD_OUT' || event.status === 'COMING_SOON';
-  const eventDate = new Date(event.start_time);
+  const eventDate = new Date(event.startTime || event.start_time);
 
   return (
     <Link 
@@ -46,7 +46,7 @@ export function EventCard({ event }: EventCardProps) {
       {/* Event Image */}
       <div className="relative aspect-[16/9] overflow-hidden">
         <img 
-          src={event.image} 
+          src={event.imageUrl || event.image} 
           alt={event.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
@@ -61,7 +61,7 @@ export function EventCard({ event }: EventCardProps) {
           {getStatusBadge()}
         </div>
         <div className="absolute top-4 right-4 px-3 py-1 bg-black/60 backdrop-blur-sm text-white rounded-full text-xs">
-          {event.category}
+          {event.category || "Âm nhạc"}
         </div>
       </div>
 

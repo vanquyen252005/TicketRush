@@ -42,12 +42,12 @@ public class EventController {
         return eventService.createEvent(request);
     }
 
-    @PutMapping("/events/{eventId}")
+    @PutMapping("/admin/events/{eventId}")
     public EventResponse updateEvent(@PathVariable Long eventId, @Valid @RequestBody EventRequest request) {
         return eventService.updateEvent(eventId, request);
     }
 
-    @DeleteMapping("/events/{eventId}")
+    @DeleteMapping("/admin/events/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteEvent(@PathVariable Long eventId) {
         eventService.deleteEvent(eventId);

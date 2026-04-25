@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { ArrowLeft, Plus, Save, Trash2, Grid3x3, Edit } from "lucide-react";
-import { mockEvents, mockZones } from "../../data/utils";
+import { mockZones } from "../../data/utils";
+import { eventService } from "../../services/event-service";
 
 interface GridSeat {
   row: number;
@@ -13,7 +14,8 @@ export function AdminSeatBuilderPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  const event = mockEvents.find(e => e.id === Number(id));
+  const [event, setEvent] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [zones, setZones] = useState(mockZones.filter(z => z.event_id === Number(id)));
   const [rows, setRows] = useState(10);
   const [cols, setCols] = useState(15);
@@ -122,6 +124,29 @@ export function AdminSeatBuilderPage() {
     alert('Sơ đồ ghế đã được lưu thành công!');
     navigate('/admin/events');
   };
+
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        if (!id) return;
+        const data = await eventService.getEventById(Number(id));
+        setEvent(data);
+      } catch (error) {
+        console.error("Lỗi khi tải sự kiện:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchEvent();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="p-8 text-center">
+        <h2 className="text-2xl font-bold text-slate-800 animate-pulse">Đang tải thông tin...</h2>
+      </div>
+    );
+  }
 
   if (!event) {
     return (

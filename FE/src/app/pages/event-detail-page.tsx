@@ -1,18 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { MapPin, Calendar, Clock, ArrowLeft, Info, Armchair } from "lucide-react";
-import { mockEvents, mockZones, generateSeats } from "../data/utils";
+import { mockZones, generateSeats } from "../data/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { SeatSelector } from "../components/seat-selector";
+import { eventService } from "../services/event-service";
 
 export function EventDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [selectedSeats, setSelectedSeats] = useState<number[]>([]);
   const [showSeatMap, setShowSeatMap] = useState(false);
+  const [event, setEvent] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const event = mockEvents.find(e => e.id === Number(id));
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        if (!id) return;
+        const data = await eventService.getEventById(Number(id));
+        setEvent(data);
+      } catch (error) {
+        console.error("Lỗi khi tải sự kiện:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchEvent();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <h2 className="text-2xl font-bold text-slate-800 animate-pulse">Đang tải thông tin sự kiện...</h2>
+      </div>
+    );
+  }
 
   if (!event) {
     return (
@@ -28,7 +52,7 @@ export function EventDetailPage() {
     );
   }
 
-  const eventDate = new Date(event.start_time);
+  const eventDate = new Date(event.startTime || event.start_time);
   const zones = mockZones.filter(z => z.event_id === event.id);
 
   const handleProceedToCheckout = () => {
@@ -42,7 +66,7 @@ export function EventDetailPage() {
       {/* Hero Section */}
       <div className="relative h-[400px] overflow-hidden">
         <img 
-          src={event.image} 
+          src={event.imageUrl || event.image} 
           alt={event.name}
           className="w-full h-full object-cover"
         />
@@ -58,7 +82,7 @@ export function EventDetailPage() {
           </button>
           
           <div className="inline-block px-3 py-1 bg-cyan-500 rounded-full text-xs text-white mb-3 w-fit">
-            {event.category}
+            {event.category || "Âm nhạc"}
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
             {event.name}

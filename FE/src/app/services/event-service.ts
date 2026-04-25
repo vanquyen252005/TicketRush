@@ -18,11 +18,11 @@ export const eventService = {
   },
 
   updateEvent: async (id: string | number, eventData: Partial<Event>): Promise<Event> => {
-    const response = await apiClient.put<Event>(`/api/events/${id}`, eventData);
+    const response = await apiClient.put<Event>(`/api/admin/events/${id}`, eventData);
     return response.data;
   },
 
   deleteEvent: async (id: string | number): Promise<void> => {
-    await apiClient.delete(`/api/events/${id}`);
+    await apiClient.delete(`/api/admin/events/${id}`);
   },
 };

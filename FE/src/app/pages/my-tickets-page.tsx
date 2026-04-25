@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router";
 import { useAuth } from "../hooks/use-auth";
 import { Ticket, MapPin, Calendar, Clock, QrCode, X } from "lucide-react";
-import { mockBookings, mockEvents, mockBookingItems } from "../data/utils";
+import { mockBookings, mockBookingItems } from "../data/utils";
+import { eventService } from "../services/event-service";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 
@@ -12,6 +13,22 @@ export function MyTicketsPage() {
   const location = useLocation();
   const isAdminView = location.pathname.startsWith('/admin');
   const homeLink = isAdminView ? '/admin/view-home' : '/';
+  const [events, setEvents] = useState<any[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const data = await eventService.getAllEvents();
+        setEvents(data);
+      } catch (error) {
+        console.error("Lỗi khi tải sự kiện:", error);
+      } finally {
+        setIsLoadingEvents(false);
+      }
+    };
+    fetchEvents();
+  }, []);
 
   // Filter bookings for current user
   const userBookings = mockBookings.filter(b => b.user_id === user?.id);
@@ -57,7 +74,11 @@ export function MyTicketsPage() {
           </div>
         )}
 
-        {userBookings.length === 0 ? (
+        {isLoadingEvents ? (
+          <div className="text-center py-20 animate-pulse">
+            <h3 className="text-xl font-semibold text-slate-700">Đang tải thông tin vé...</h3>
+          </div>
+        ) : userBookings.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-24 h-24 mx-auto mb-6 bg-slate-100 rounded-full flex items-center justify-center">
               <Ticket className="w-12 h-12 text-slate-400" />
@@ -78,9 +99,9 @@ export function MyTicketsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {userBookings.map((booking) => {
-              const event = mockEvents.find(e => e.id === booking.event_id);
+              const event = events.find(e => e.id === booking.event_id);
               const items = mockBookingItems.filter(item => item.booking_id === booking.id);
-              const eventDate = event ? new Date(event.start_time) : new Date();
+              const eventDate = event ? new Date(event.startTime || event.start_time) : new Date();
 
               return (
                 <div
