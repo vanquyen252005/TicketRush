@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { Plus, Search, Edit, Trash2, Settings, MapPin, Calendar, Loader2, AlertCircle } from "lucide-react";
-// import { eventService } from "../../services/event-service";
+import { eventService } from "../../services/event-service";
 import { Event, mockEvents } from "../../data/utils";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -12,21 +12,22 @@ export function AdminEventsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setIsLoading(true);
         // Tạm thời comment API để dùng mock data
-        /*
+
         const data = await eventService.getAllEvents();
         setEvents(data);
         setError(null);
-        */
+
 
         // Sử dụng mock data
-        setEvents(mockEvents);
-        setError(null);
+        //         setEvents(mockEvents);
+        //         setError(null);
       } catch (err) {
         console.error("Failed to fetch events:", err);
         setError("Không thể tải danh sách sự kiện. Vui lòng kiểm tra kết nối Backend.");
@@ -37,6 +38,54 @@ export function AdminEventsPage() {
 
     fetchEvents();
   }, []);
+
+  const handleSubmitEvent = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    const formatDateTime = (val: FormDataEntryValue | null) => {
+      if (!val || typeof val !== "string") return null;
+      return val.length === 16 ? val + ":00" : val;
+    };
+
+    const eventData: any = {
+      name: formData.get("name"),
+      description: formData.get("description"),
+      location: formData.get("location"),
+      startTime: formatDateTime(formData.get("start_time")),
+      endTime: formatDateTime(formData.get("end_time")),
+      imageUrl: formData.get("image"),
+      status: formData.get("status") || "DRAFT"
+    };
+
+    try {
+      if (editingEvent) {
+        await eventService.updateEvent(editingEvent.id, eventData);
+        alert("Cập nhật thành công!");
+      } else {
+        await eventService.createEvent(eventData);
+        alert("Tạo mới thành công!");
+      }
+      setShowCreateModal(false);
+      setEditingEvent(null);
+      window.location.reload();
+    } catch (error) {
+      console.error("Lỗi khi lưu sự kiện:", error);
+      alert("Có lỗi xảy ra khi lưu!");
+    }
+  };
+
+  const handleDeleteEvent = async (id: number) => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa sự kiện này?")) return;
+    try {
+      await eventService.deleteEvent(id);
+      setEvents(events.filter((e) => e.id !== id));
+      alert("Đã xóa sự kiện!");
+    } catch (err) {
+      console.error("Lỗi khi xóa sự kiện:", err);
+      alert("Xóa thất bại!");
+    }
+  };
 
   const filteredEvents = events.filter(event =>
     event.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -76,7 +125,10 @@ export function AdminEventsPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <button
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => {
+            setEditingEvent(null);
+            setShowCreateModal(true);
+          }}
           className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all hover:shadow-lg"
         >
           <Plus className="w-5 h-5" />
@@ -122,8 +174,8 @@ export function AdminEventsPage() {
       {/* Events Grid */}
       {!isLoading && !error && (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {filteredEvents.map((event) => {
-            const eventDate = new Date(event.start_time);
+          {filteredEvents.map((event: any) => {
+            const eventDate = new Date(event.startTime || event.start_time);
 
             return (
               <div
@@ -133,7 +185,7 @@ export function AdminEventsPage() {
                 {/* Event Image */}
                 <div className="relative aspect-[16/9] overflow-hidden">
                   <img
-                    src={event.image}
+                    src={event.imageUrl || event.image}
                     alt={event.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -170,10 +222,19 @@ export function AdminEventsPage() {
                       <Settings className="w-4 h-4" />
                       <span className="text-sm font-semibold">Sơ đồ ghế</span>
                     </Link>
-                    <button className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors">
+                    <button
+                      onClick={() => {
+                        setEditingEvent(event);
+                        setShowCreateModal(true);
+                      }}
+                      className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                    >
                       <Edit className="w-4 h-4" />
                     </button>
-                    <button className="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors">
+                    <button
+                      onClick={() => handleDeleteEvent(event.id)}
+                      className="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -207,16 +268,19 @@ export function AdminEventsPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl font-bold text-slate-800 mb-6">
-              Tạo sự kiện mới
+              {editingEvent ? "Chỉnh sửa sự kiện" : "Tạo sự kiện mới"}
             </h2>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmitEvent}>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   Tên sự kiện
                 </label>
                 <input
                   type="text"
+                  name="name"
+                  required
+                  defaultValue={editingEvent?.name}
                   placeholder="VD: Monsoon Music Festival 2026"
                   className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
@@ -227,6 +291,8 @@ export function AdminEventsPage() {
                   Mô tả
                 </label>
                 <textarea
+                  name="description"
+                  defaultValue={editingEvent?.description}
                   rows={4}
                   placeholder="Mô tả chi tiết về sự kiện..."
                   className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
@@ -239,6 +305,9 @@ export function AdminEventsPage() {
                 </label>
                 <input
                   type="text"
+                  name="location"
+                  required
+                  defaultValue={editingEvent?.location}
                   placeholder="VD: Công viên Yên Sở, Hà Nội"
                   className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
@@ -251,6 +320,9 @@ export function AdminEventsPage() {
                   </label>
                   <input
                     type="datetime-local"
+                    name="start_time"
+                    required
+                    defaultValue={editingEvent?.startTime || editingEvent?.start_time}
                     className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   />
                 </div>
@@ -260,9 +332,27 @@ export function AdminEventsPage() {
                   </label>
                   <input
                     type="datetime-local"
+                    name="end_time"
+                    defaultValue={editingEvent?.endTime || editingEvent?.end_time}
                     className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Trạng thái
+                </label>
+                <select
+                  name="status"
+                  defaultValue={editingEvent?.status || "DRAFT"}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white"
+                >
+                  <option value="DRAFT">Bản nháp (DRAFT)</option>
+                  <option value="PUBLISHED">Đã xuất bản (PUBLISHED)</option>
+                  <option value="SOLD_OUT">Hết vé (SOLD_OUT)</option>
+                  <option value="CANCELLED">Đã hủy (CANCELLED)</option>
+                </select>
               </div>
 
               <div>
@@ -271,6 +361,8 @@ export function AdminEventsPage() {
                 </label>
                 <input
                   type="url"
+                  name="image"
+                  defaultValue={editingEvent?.imageUrl || editingEvent?.image}
                   placeholder="https://example.com/image.jpg"
                   className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
@@ -288,7 +380,7 @@ export function AdminEventsPage() {
                   type="submit"
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all"
                 >
-                  Tạo sự kiện
+                  {editingEvent ? "Lưu thay đổi" : "Tạo sự kiện"}
                 </button>
               </div>
             </form>

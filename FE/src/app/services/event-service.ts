@@ -1,7 +1,6 @@
 import apiClient from "../api-client";
 import { Event } from "../data/utils";
 
-// 🚀 BƯỚC 3: Gọi API (sử dụng Axios)
 export const eventService = {
   getAllEvents: async (): Promise<Event[]> => {
     const response = await apiClient.get<Event[]>("/api/events");
@@ -14,7 +13,7 @@ export const eventService = {
   },
 
   createEvent: async (eventData: Partial<Event>): Promise<Event> => {
-    const response = await apiClient.post<Event>("/api/events", eventData);
+    const response = await apiClient.post<Event>("/api/admin/events/create", eventData);
     return response.data;
   },
 
