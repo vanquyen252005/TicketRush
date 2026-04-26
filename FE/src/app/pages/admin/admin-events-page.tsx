@@ -124,6 +124,7 @@ export function AdminEventsPage() {
   const [liveError, setLiveError] = useState<string | null>(null);
   const [liveUpdatedAt, setLiveUpdatedAt] = useState<Date | null>(null);
   const [liveRefreshTick, setLiveRefreshTick] = useState(0);
+  const [timeError, setTimeError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -196,6 +197,16 @@ export function AdminEventsPage() {
   const handleSubmitEvent = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+    setTimeError(null);
+
+    const start_time = formData.get("start_time");
+    if (start_time && typeof start_time === "string" && !editingEvent) {
+      const selectedTime = new Date(start_time).getTime();
+      if (selectedTime < Date.now()) {
+        setTimeError("Thời gian bắt đầu phải ở hiện tại hoặc tương lai.");
+        return;
+      }
+    }
 
     const formatDateTime = (val: FormDataEntryValue | null) => {
       if (!val || typeof val !== "string") return null;
@@ -313,6 +324,7 @@ export function AdminEventsPage() {
           <button
             onClick={() => {
               setEditingEvent(null);
+              setTimeError(null);
               setShowCreateModal(true);
             }}
             className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all hover:shadow-lg"
@@ -429,6 +441,7 @@ export function AdminEventsPage() {
                         <button
                           onClick={() => {
                             setEditingEvent(event);
+                            setTimeError(null);
                             setShowCreateModal(true);
                           }}
                           className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
@@ -530,8 +543,16 @@ export function AdminEventsPage() {
                     name="start_time"
                     required
                     defaultValue={editingEvent?.startTime || editingEvent?.start_time}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    onChange={() => {
+                      if (timeError) setTimeError(null);
+                    }}
+                    className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 ${timeError ? 'border-red-500 focus:ring-red-500 ring-1 ring-red-500' : 'border-slate-300 focus:ring-cyan-500'}`}
                   />
+                  {timeError && (
+                    <p className="mt-1 text-xs text-red-500 font-medium">
+                      {timeError}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
