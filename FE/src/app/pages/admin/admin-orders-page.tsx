@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 import { ShoppingBag, Search, Eye, CheckCircle, Clock, XCircle, Ticket, User, MapPin, Calendar, Wallet } from "lucide-react";
 import { BookingStatus, AdminBooking } from "../../types";
 import { adminBookingService } from "../../services/admin-booking-service";
@@ -9,6 +10,9 @@ import { isAxiosError } from "axios";
 type BookingFilter = BookingStatus | "ALL";
 
 export function AdminOrdersPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const userIdFilter = useMemo(() => new URLSearchParams(location.search).get("userId") || undefined, [location.search]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<BookingFilter>("ALL");
   const [bookings, setBookings] = useState<AdminBooking[]>([]);
@@ -19,7 +23,7 @@ export function AdminOrdersPage() {
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const data = await adminBookingService.getBookings();
+        const data = await adminBookingService.getBookings(userIdFilter);
         setBookings(data);
         setError(null);
       } catch (err) {
@@ -35,7 +39,7 @@ export function AdminOrdersPage() {
     };
 
     fetchBookings();
-  }, []);
+  }, [userIdFilter]);
 
   const filteredBookings = useMemo(() => {
     return bookings.filter((booking) => {
@@ -94,6 +98,20 @@ export function AdminOrdersPage() {
 
   return (
     <div className="space-y-6">
+      {userIdFilter && (
+        <div className="bg-cyan-50 border border-cyan-100 rounded-xl p-4 flex items-center justify-between gap-3">
+          <div className="text-sm text-cyan-800 font-medium">
+            Đang lọc đơn hàng theo người dùng: <span className="font-bold font-mono">{userIdFilter}</span>
+          </div>
+          <button
+            onClick={() => navigate("/admin/orders")}
+            className="px-4 py-2 rounded-lg bg-white border border-cyan-200 text-cyan-700 text-sm font-bold hover:bg-cyan-50"
+          >
+            Bỏ lọc
+          </button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
           <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Tổng đơn hàng</p>

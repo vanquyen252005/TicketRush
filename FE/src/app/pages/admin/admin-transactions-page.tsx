@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 import { CreditCard, Search, ArrowUpRight, CheckCircle, Clock, AlertTriangle, Loader2, Wallet, RefreshCw } from "lucide-react";
 import { PaymentStatus, AdminPaymentTransaction } from "../../types";
 import { adminTransactionService } from "../../services/admin-transaction-service";
@@ -7,6 +8,9 @@ import { vi } from "date-fns/locale";
 import { isAxiosError } from "axios";
 
 export function AdminTransactionsPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const userIdFilter = useMemo(() => new URLSearchParams(location.search).get("userId") || undefined, [location.search]);
   const [searchTerm, setSearchTerm] = useState("");
   const [transactions, setTransactions] = useState<AdminPaymentTransaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,7 +25,7 @@ export function AdminTransactionsPage() {
     }
 
     try {
-      const data = await adminTransactionService.getTransactions();
+      const data = await adminTransactionService.getTransactions(userIdFilter);
       setTransactions(data);
       setError(null);
     } catch (err) {
@@ -39,7 +43,7 @@ export function AdminTransactionsPage() {
 
   useEffect(() => {
     fetchTransactions();
-  }, []);
+  }, [userIdFilter]);
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((tx) => {
@@ -93,6 +97,20 @@ export function AdminTransactionsPage() {
 
   return (
     <div className="space-y-6">
+      {userIdFilter && (
+        <div className="bg-cyan-50 border border-cyan-100 rounded-xl p-4 flex items-center justify-between gap-3">
+          <div className="text-sm text-cyan-800 font-medium">
+            Đang lọc giao dịch theo người dùng: <span className="font-bold font-mono">{userIdFilter}</span>
+          </div>
+          <button
+            onClick={() => navigate("/admin/transactions")}
+            className="px-4 py-2 rounded-lg bg-white border border-cyan-200 text-cyan-700 text-sm font-bold hover:bg-cyan-50"
+          >
+            Bỏ lọc
+          </button>
+        </div>
+      )}
+
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 mb-2">Giao dịch thanh toán</h2>
