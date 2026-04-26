@@ -1,8 +1,8 @@
 export type AuthProvider = 'LOCAL' | 'GOOGLE';
 export type UserRole = 'CUSTOMER' | 'ADMIN' | 'ORGANIZER';
-export type UserStatus = 'ACTIVE' | 'BANNED';
+export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'DELETED';
 
-export type EventStatus = 'DRAFT' | 'COMING_SOON' | 'SELLING' | 'SOLD_OUT' | 'COMPLETED';
+export type EventStatus = 'DRAFT' | 'COMING_SOON' | 'SELLING' | 'PUBLISHED' | 'SOLD_OUT' | 'COMPLETED' | 'CANCELLED';
 export type SeatStatus = 'AVAILABLE' | 'LOCKED' | 'BOOKED';
 export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED';
 export type CheckInStatus = 'UNUSED' | 'USED' | 'REFUNDED';
@@ -30,11 +30,15 @@ export interface Event {
   name: string;
   description: string;
   location: string;
-  start_time: string;
-  end_time: string;
+  start_time?: string;
+  end_time?: string;
   status: EventStatus;
   image?: string;
+  imageUrl?: string;
+  startTime?: string;
+  endTime?: string;
   category?: string;
+  zones?: Zone[];
   created_at?: string;
   updated_at?: string;
 }
@@ -47,6 +51,7 @@ export interface Zone {
   color_hex: string;
   capacity: number;
   available?: number;
+  seats?: Seat[];
   created_at?: string;
 }
 
@@ -69,6 +74,7 @@ export interface Booking {
   status: BookingStatus;
   payment_transaction_id?: string;
   expires_at: string;
+  items?: BookingItem[];
   created_at?: string;
   updated_at?: string;
 }
@@ -79,8 +85,8 @@ export interface BookingItem {
   seat_id: number; // BIGINT
   seat_label: string;
   price_at_purchase: number;
-  ticket_code: string;
-  check_in_status: CheckInStatus;
+  ticket_code?: string;
+  check_in_status?: CheckInStatus;
   checked_in_at?: string;
 }
 
@@ -100,6 +106,77 @@ export interface PaymentTransaction {
   updated_at?: string;
 }
 
+export interface AdminBookingItem {
+  id: string;
+  seat_id?: number;
+  seat_label: string;
+  zone_name?: string;
+  row_label?: string;
+  seat_number?: string;
+  price_at_purchase: number;
+}
+
+export interface AdminBooking {
+  id: string;
+  user_id?: string;
+  user_full_name?: string;
+  user_email?: string;
+  user_phone_number?: string;
+  event_id?: number;
+  event_name?: string;
+  event_location?: string;
+  total_amount: number;
+  status: BookingStatus;
+  payment_transaction_id?: string;
+  expires_at: string;
+  created_at?: string;
+  updated_at?: string;
+  items?: AdminBookingItem[];
+}
+
+export interface AdminPaymentTransaction {
+  id: string;
+  booking_id?: string;
+  event_id?: number;
+  event_name?: string;
+  user_id?: string;
+  user_full_name?: string;
+  user_email?: string;
+  amount: number;
+  currency: string;
+  payment_method: PaymentMethod;
+  status: PaymentStatus;
+  gateway_transaction_id?: string;
+  reference_txn_id?: string;
+  error_message?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AdminUserSummary {
+  id: string;
+  email: string;
+  full_name: string;
+  phone_number?: string;
+  gender?: string;
+  date_of_birth?: string;
+  role: string;
+  status: string;
+  created_at?: string;
+  updated_at?: string;
+  booking_count: number;
+  ticket_count: number;
+  transaction_count: number;
+  total_spent: number;
+  last_activity_at?: string;
+}
+
+export interface AdminUserDetail {
+  user: AdminUserSummary;
+  bookings: AdminBooking[];
+  transactions: AdminPaymentTransaction[];
+}
+
 export interface DashboardStats {
   total_revenue: number;
   total_tickets_sold: number;
@@ -108,11 +185,36 @@ export interface DashboardStats {
   revenue_data: Array<{ month: string; revenue: number }>;
   ticket_data: Array<{ month: string; tickets: number }>;
   event_performance: Array<{
+    event_id?: number;
     name: string;
     sold: number;
     total: number;
     revenue: number;
+    fill_rate?: number;
+    status?: EventStatus;
   }>;
+  audience_age_data?: Array<{ label: string; count: number; percentage: number }>;
+  audience_gender_data?: Array<{ label: string; count: number; percentage: number }>;
+  generated_at?: string;
+}
+
+export interface SeatLayoutSeatInput {
+  row_label: string;
+  seat_number: string;
+}
+
+export interface SeatLayoutZoneInput {
+  id?: number;
+  name: string;
+  base_price: number;
+  color_hex: string;
+  seats: SeatLayoutSeatInput[];
+}
+
+export interface SeatLayoutRequest {
+  rows: number;
+  cols: number;
+  zones: SeatLayoutZoneInput[];
 }
 
 export interface AuthResponse {
@@ -131,4 +233,3 @@ export interface LoginData {
   email: string;
   password?: string;
 }
-

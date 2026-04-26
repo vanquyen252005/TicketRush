@@ -11,6 +11,7 @@ interface EventCardProps {
 export function EventCard({ event }: EventCardProps) {
   const getStatusBadge = () => {
     switch (event.status) {
+      case 'PUBLISHED':
       case 'SELLING':
         return (
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500 text-white rounded-full text-xs animate-pulse">
@@ -30,23 +31,42 @@ export function EventCard({ event }: EventCardProps) {
             Hết vé
           </div>
         );
+      case 'CANCELLED':
+        return (
+          <div className="px-3 py-1 bg-slate-500 text-white rounded-full text-xs">
+            Đã hủy
+          </div>
+        );
+      case 'DRAFT':
+        return (
+          <div className="px-3 py-1 bg-slate-400 text-white rounded-full text-xs">
+            Bản nháp
+          </div>
+        );
+      case 'COMPLETED':
+        return (
+          <div className="px-3 py-1 bg-slate-600 text-white rounded-full text-xs">
+            Đã kết thúc
+          </div>
+        );
       default:
         return null;
     }
   };
 
-  const isDisabled = event.status === 'SOLD_OUT' || event.status === 'COMING_SOON';
-  const eventDate = new Date(event.start_time);
+  const isDisabled = event.status === 'SOLD_OUT' || event.status === 'COMING_SOON' || event.status === 'DRAFT' || event.status === 'CANCELLED' || event.status === 'COMPLETED';
+  const eventDate = new Date(event.startTime || event.start_time);
 
   return (
     <Link 
       to={`/event/${event.id}`}
+      state={{ event }}
       className="block group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden hover:scale-[1.02] active:scale-95 cursor-pointer border border-slate-100"
     >
       {/* Event Image */}
       <div className="relative aspect-[16/9] overflow-hidden">
         <img 
-          src={event.image} 
+          src={event.imageUrl || event.image} 
           alt={event.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
@@ -61,7 +81,7 @@ export function EventCard({ event }: EventCardProps) {
           {getStatusBadge()}
         </div>
         <div className="absolute top-4 right-4 px-3 py-1 bg-black/60 backdrop-blur-sm text-white rounded-full text-xs">
-          {event.category}
+          {event.category || "Âm nhạc"}
         </div>
       </div>
 

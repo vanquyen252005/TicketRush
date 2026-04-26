@@ -1,6 +1,7 @@
 package com.example.ticketRush.EventModule.Controller;
 
 import com.example.ticketRush.EventModule.Dto.Request.EventRequest;
+import com.example.ticketRush.EventModule.Dto.Request.EventSeatLayoutRequest;
 import com.example.ticketRush.EventModule.Dto.Response.EventResponse;
 import com.example.ticketRush.EventModule.Service.EventService;
 import jakarta.validation.Valid;
@@ -21,33 +22,38 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/admin/events")
-@CrossOrigin(origins = {"http://localhost:5174", "http://127.0.0.1:5174"})
+@RequestMapping("/api")
+@CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173"})
 public class EventController {
     private final EventService eventService;
 
-    @GetMapping
+    @GetMapping("/events")
     public List<EventResponse> getAllEvents() {
         return eventService.getAllEvents();
     }
 
-    @GetMapping("/{eventId}")
+    @GetMapping("/events/{eventId}")
     public EventResponse getEvent(@PathVariable Long eventId) {
         return eventService.getEventById(eventId);
     }
 
-    @PostMapping
+    @PostMapping("/admin/events/create")
     @ResponseStatus(HttpStatus.CREATED)
     public EventResponse createEvent(@Valid @RequestBody EventRequest request) {
         return eventService.createEvent(request);
     }
 
-    @PutMapping("/{eventId}")
+    @PutMapping("/admin/events/{eventId}")
     public EventResponse updateEvent(@PathVariable Long eventId, @Valid @RequestBody EventRequest request) {
         return eventService.updateEvent(eventId, request);
     }
 
-    @DeleteMapping("/{eventId}")
+    @PutMapping("/admin/events/{eventId}/seat-layout")
+    public EventResponse updateSeatLayout(@PathVariable Long eventId, @Valid @RequestBody EventSeatLayoutRequest request) {
+        return eventService.updateSeatLayout(eventId, request);
+    }
+
+    @DeleteMapping("/admin/events/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteEvent(@PathVariable Long eventId) {
         eventService.deleteEvent(eventId);

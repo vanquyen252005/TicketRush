@@ -11,7 +11,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "zones")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Zone {
 
     @Id
@@ -27,6 +31,9 @@ public class Zone {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
+
+    @Column(name = "color_hex", length = 7)
+    private String colorHex;
 
     @Column(nullable = false)
     private Integer capacity; // Tổng số lượng ghế trong khu vực này

@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { generateSeats } from "../data/utils";
+import { useEffect, useMemo, useState } from "react";
 import { Zone, Seat } from "../types";
 import { Armchair, X } from "lucide-react";
 
@@ -11,9 +10,32 @@ interface SeatSelectorProps {
 
 export function SeatSelector({ zones, selectedSeats, onSeatsChange }: SeatSelectorProps) {
   const [selectedZone, setSelectedZone] = useState<number>(zones[0]?.id || 1);
-  
+
+  useEffect(() => {
+    if (zones.length === 0) {
+      return;
+    }
+
+    if (!zones.some(zone => zone.id === selectedZone)) {
+      setSelectedZone(zones[0].id);
+    }
+  }, [selectedZone, zones]);
+
   const zone = zones.find(z => z.id === selectedZone);
-  const seats = zone ? generateSeats(zone.id, 8, 12, 0.4) : [];
+  const seats = useMemo(() => {
+    if (!zone?.seats?.length) {
+      return [];
+    }
+
+    return [...zone.seats].sort((a, b) => {
+      const rowCompare = a.row_label.localeCompare(b.row_label, undefined, { numeric: true, sensitivity: "base" });
+      if (rowCompare !== 0) {
+        return rowCompare;
+      }
+
+      return a.seat_number.localeCompare(b.seat_number, undefined, { numeric: true, sensitivity: "base" });
+    });
+  }, [zone]);
 
   const handleSeatClick = (seat: Seat) => {
     if (seat.status === 'BOOKED' || seat.status === 'LOCKED') return;
@@ -77,38 +99,42 @@ export function SeatSelector({ zones, selectedSeats, onSeatsChange }: SeatSelect
       {/* Seat Map */}
       <div className="bg-slate-50 rounded-xl p-6 overflow-x-auto">
         <div className="inline-block min-w-full">
-          {/* Row by row */}
-          {Array.from(new Set(seats.map(s => s.row_label))).map((row) => (
-            <div key={row} className="flex items-center gap-2 mb-2">
-              {/* Row label */}
-              <div className="w-8 text-center font-semibold text-slate-600">
-                {row}
-              </div>
-              
-              {/* Seats in row */}
-              <div className="flex gap-1">
-                {seats
-                  .filter(s => s.row_label === row)
-                  .map((seat) => (
-                    <button
-                      key={seat.id}
-                      onClick={() => handleSeatClick(seat)}
-                      disabled={seat.status === 'BOOKED' || seat.status === 'LOCKED'}
-                      className={`w-8 h-8 rounded border-2 transition-all flex items-center justify-center text-xs ${getSeatColor(seat)}`}
-                      title={`${row}${seat.seat_number} - ${seat.status === 'BOOKED' ? 'Đã bán' : seat.status === 'LOCKED' ? 'Đang giữ' : 'Có sẵn'}`}
-                    >
-                      {seat.status === 'BOOKED' ? (
-                        <X className="w-4 h-4 text-slate-600" />
-                      ) : selectedSeats.includes(seat.id) ? (
-                        <span className="text-white font-bold">✓</span>
-                      ) : (
-                        <Armchair className="w-4 h-4 text-slate-400" />
-                      )}
-                    </button>
-                  ))}
-              </div>
+          {seats.length === 0 ? (
+            <div className="py-16 text-center text-slate-500">
+              <Armchair className="w-12 h-12 mx-auto mb-3 text-slate-300" />
+              <p>Chưa có dữ liệu ghế cho khu vực này</p>
             </div>
-          ))}
+          ) : (
+            Array.from(new Set(seats.map(s => s.row_label))).map((row) => (
+              <div key={row} className="flex items-center gap-2 mb-2">
+                <div className="w-8 text-center font-semibold text-slate-600">
+                  {row}
+                </div>
+
+                <div className="flex gap-1">
+                  {seats
+                    .filter(s => s.row_label === row)
+                    .map((seat) => (
+                      <button
+                        key={seat.id}
+                        onClick={() => handleSeatClick(seat)}
+                        disabled={seat.status === 'BOOKED' || seat.status === 'LOCKED'}
+                        className={`w-8 h-8 rounded border-2 transition-all flex items-center justify-center text-xs ${getSeatColor(seat)}`}
+                        title={`${row}${seat.seat_number} - ${seat.status === 'BOOKED' ? 'Đã bán' : seat.status === 'LOCKED' ? 'Đang giữ' : 'Có sẵn'}`}
+                      >
+                        {seat.status === 'BOOKED' ? (
+                          <X className="w-4 h-4 text-slate-600" />
+                        ) : selectedSeats.includes(seat.id) ? (
+                          <span className="text-white font-bold">✓</span>
+                        ) : (
+                          <Armchair className="w-4 h-4 text-slate-400" />
+                        )}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
