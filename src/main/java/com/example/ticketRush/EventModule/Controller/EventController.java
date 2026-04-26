@@ -1,6 +1,7 @@
 package com.example.ticketRush.EventModule.Controller;
 
 import com.example.ticketRush.EventModule.Dto.Request.EventRequest;
+import com.example.ticketRush.EventModule.Dto.Request.EventSeatLayoutRequest;
 import com.example.ticketRush.EventModule.Dto.Response.EventResponse;
 import com.example.ticketRush.EventModule.Service.EventService;
 import jakarta.validation.Valid;
@@ -45,6 +46,11 @@ public class EventController {
     @PutMapping("/admin/events/{eventId}")
     public EventResponse updateEvent(@PathVariable Long eventId, @Valid @RequestBody EventRequest request) {
         return eventService.updateEvent(eventId, request);
+    }
+
+    @PutMapping("/admin/events/{eventId}/seat-layout")
+    public EventResponse updateSeatLayout(@PathVariable Long eventId, @Valid @RequestBody EventSeatLayoutRequest request) {
+        return eventService.updateSeatLayout(eventId, request);
     }
 
     @DeleteMapping("/admin/events/{eventId}")

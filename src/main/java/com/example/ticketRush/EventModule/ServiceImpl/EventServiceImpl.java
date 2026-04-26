@@ -1,9 +1,16 @@
 package com.example.ticketRush.EventModule.ServiceImpl;
 
+import com.example.ticketRush.BookingModule.Enum.BookingStatus;
+import com.example.ticketRush.BookingModule.Repository.BookingRepository;
 import com.example.ticketRush.EventModule.Dto.Request.EventRequest;
+import com.example.ticketRush.EventModule.Dto.Request.EventSeatLayoutRequest;
 import com.example.ticketRush.EventModule.Dto.Response.EventResponse;
 import com.example.ticketRush.EventModule.Entity.Event;
+import com.example.ticketRush.EventModule.Entity.Seat;
+import com.example.ticketRush.EventModule.Entity.Zone;
+import com.example.ticketRush.EventModule.Enum.SeatStatus;
 import com.example.ticketRush.EventModule.Exception.EventNotFoundException;
+import com.example.ticketRush.EventModule.Exception.SeatLayoutConflictException;
 import com.example.ticketRush.EventModule.Mapper.EventMapper;
 import com.example.ticketRush.EventModule.Repository.EventRepository;
 import com.example.ticketRush.EventModule.Service.EventService;
@@ -19,6 +26,7 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
+    private final BookingRepository bookingRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -32,7 +40,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public EventResponse getEventById(Long eventId) {
-        return EventMapper.toResponse(getEventEntity(eventId));
+        return EventMapper.toDetailedResponse(getEventEntity(eventId, true));
     }
 
     @Override
@@ -56,12 +64,67 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public EventResponse updateSeatLayout(Long eventId, EventSeatLayoutRequest request) {
+        Event event = getEventEntity(eventId, true);
+
+        if (bookingRepository.countByEventIdAndStatusIn(eventId, List.of(BookingStatus.PENDING, BookingStatus.PAID)) > 0) {
+            throw new SeatLayoutConflictException("Không thể thay đổi sơ đồ ghế khi sự kiện đã có đơn hàng đang giữ hoặc đã thanh toán");
+        }
+
+        boolean hasLockedOrSoldSeats = event.getZones().stream()
+                .flatMap(zone -> zone.getSeats() == null ? java.util.stream.Stream.empty() : zone.getSeats().stream())
+                .anyMatch(seat -> seat.getStatus() != SeatStatus.AVAILABLE);
+
+        if (hasLockedOrSoldSeats) {
+            throw new SeatLayoutConflictException("Không thể thay đổi sơ đồ ghế khi còn ghế đang giữ hoặc đã bán");
+        }
+
+        event.getZones().clear();
+
+        String layoutMetadata = String.format("{\"rows\":%d,\"cols\":%d}", request.rows(), request.cols());
+
+        request.zones().forEach(zoneRequest -> {
+            Zone zone = Zone.builder()
+                    .name(zoneRequest.name())
+                    .price(zoneRequest.base_price())
+                    .colorHex(zoneRequest.color_hex())
+                    .capacity(zoneRequest.seats().size())
+                    .layoutMetadata(layoutMetadata)
+                    .build();
+            zone.setEvent(event);
+
+            zoneRequest.seats().forEach(seatRequest -> {
+                Seat seat = Seat.builder()
+                        .rowLabel(seatRequest.row_label())
+                        .seatNumber(seatRequest.seat_number())
+                        .status(SeatStatus.AVAILABLE)
+                        .zone(zone)
+                        .build();
+                zone.getSeats().add(seat);
+            });
+
+            event.getZones().add(zone);
+        });
+
+        return EventMapper.toDetailedResponse(eventRepository.save(event));
+    }
+
+    @Override
     public void deleteEvent(Long eventId) {
         Event event = getEventEntity(eventId);
         eventRepository.delete(event);
     }
 
     private Event getEventEntity(Long eventId) {
+        return getEventEntity(eventId, false);
+    }
+
+    private Event getEventEntity(Long eventId, boolean detailed) {
+        if (detailed) {
+            return eventRepository.findDetailedById(eventId)
+                    .orElseThrow(() -> new EventNotFoundException(eventId));
+        }
+
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException(eventId));
     }

@@ -1,26 +1,34 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { Clock, CreditCard, MapPin, Calendar, CheckCircle2 } from "lucide-react";
-import { mockZones, generateSeats } from "../data/utils";
 import { eventService } from "../services/event-service";
+import { bookingService } from "../services/booking-service";
+import { Booking } from "../types";
+import { isAxiosError } from "axios";
+import { toast } from "sonner";
 
 export function CheckoutPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { eventId, seatIds } = location.state || {};
-  
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+  const state = location.state as { bookingId?: string } | null;
+  const searchParams = new URLSearchParams(location.search);
+  const bookingId = searchParams.get("bookingId") || state?.bookingId;
+
+  const [timeLeft, setTimeLeft] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [event, setEvent] = useState<any>(null);
+  const [booking, setBooking] = useState<Booking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch event
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        if (!eventId) return;
-        const data = await eventService.getEventById(Number(eventId));
+        if (!bookingId) return;
+        const bookingData = await bookingService.getBookingById(bookingId);
+        setBooking(bookingData);
+
+        const data = await eventService.getEventById(Number(bookingData.event_id));
         setEvent(data);
       } catch (error) {
         console.error("Lỗi khi tải sự kiện:", error);
@@ -29,22 +37,44 @@ export function CheckoutPage() {
       }
     };
     fetchEvent();
-  }, [eventId]);
+  }, [bookingId]);
 
-  // Countdown timer
   useEffect(() => {
-    if (timeLeft <= 0) {
-      alert("Hết thời gian giữ chỗ!");
-      navigate(`/event/${eventId}`);
+    if (!booking) {
       return;
     }
 
-    const timer = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
-    }, 1000);
+    if (booking.status === "CONFIRMED") {
+      setShowSuccess(true);
+      const timer = setTimeout(() => {
+        navigate("/my-tickets");
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+
+    if (booking.status !== "PENDING" || !booking.expires_at) {
+      return;
+    }
+
+    const updateTimer = () => {
+      const diff = Math.max(
+        0,
+        Math.floor((new Date(booking.expires_at).getTime() - Date.now()) / 1000)
+      );
+      setTimeLeft(diff);
+
+      if (diff <= 0) {
+        alert("Hết thời gian giữ chỗ!");
+        navigate(`/event/${booking.event_id}`);
+      }
+    };
+
+    updateTimer();
+    const timer = setInterval(updateTimer, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, navigate, eventId]);
+  }, [booking, navigate]);
 
   if (isLoading) {
     return (
@@ -54,7 +84,7 @@ export function CheckoutPage() {
     );
   }
 
-  if (!eventId || !seatIds || seatIds.length === 0 || !event) {
+  if (!bookingId || !booking || !event) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h2 className="text-2xl font-bold text-slate-800 mb-4">
@@ -70,30 +100,47 @@ export function CheckoutPage() {
     );
   }
 
-  const zones = mockZones.filter(z => z.event_id === eventId);
-  const allSeats = zones.flatMap(zone => generateSeats(zone.id, 5, 10));
-  const selectedSeats = allSeats.filter(s => seatIds.includes(s.id));
-  const totalAmount = selectedSeats.reduce((sum, seat) => {
-    const zone = zones.find(z => z.id === seat.zone_id);
-    return sum + (zone?.base_price || 0);
+  const zones = event.zones ?? [];
+  const seatIndex = zones.flatMap((zone: any) =>
+    (zone.seats ?? []).map((seat: any) => ({ zone, seat }))
+  );
+  const selectedSeats = (booking.items ?? []).map((item) => {
+    const match = seatIndex.find((entry: any) => entry.seat.id === item.seat_id);
+    return match ? { ...match, item } : null;
+  }).filter(Boolean) as Array<{ zone: any; seat: any; item: NonNullable<Booking["items"]>[number] }>;
+  const totalAmount = booking.total_amount || selectedSeats.reduce((sum, entry) => {
+    return sum + (entry.item.price_at_purchase || entry.zone.base_price || 0);
   }, 0);
+  const canSubmitPayment = booking.status === "PENDING";
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
 
   const handlePayment = async () => {
+    if (!canSubmitPayment) {
+      toast.error("Đơn hàng đã được xử lý");
+      return;
+    }
+
     setIsProcessing(true);
-    
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsProcessing(false);
-    setShowSuccess(true);
-    
-    // Redirect to success page after 3 seconds
-    setTimeout(() => {
-      navigate("/my-tickets");
-    }, 3000);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1200));
+      const updatedBooking = await bookingService.confirmBooking(booking.id);
+      setBooking(updatedBooking);
+      setShowSuccess(true);
+
+      setTimeout(() => {
+        navigate("/my-tickets");
+      }, 3000);
+    } catch (error) {
+      const message = isAxiosError(error)
+        ? (error.response?.data as any)?.error || (error.response?.data as any)?.message || error.message
+        : "Không thể xác nhận thanh toán";
+      toast.error(message);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (showSuccess) {
@@ -165,20 +212,20 @@ export function CheckoutPage() {
                 </h3>
                 <div className="space-y-2">
                   {selectedSeats.map((seat) => {
-                    const zone = zones.find(z => z.id === seat.zone_id);
+                    const zone = seat.zone;
                     return (
-                      <div key={seat.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                      <div key={seat.item.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
                         <div className="flex items-center gap-3">
                           <div 
                             className="w-4 h-4 rounded"
                             style={{ backgroundColor: zone?.color_hex }}
                           ></div>
                           <span className="font-medium">
-                            {zone?.name} - Ghế {seat.row_label}{seat.seat_number}
+                            {zone?.name} - Ghế {seat.seat.row_label}{seat.seat.seat_number}
                           </span>
                         </div>
                         <span className="font-bold text-cyan-600">
-                          {zone?.base_price.toLocaleString('vi-VN')}đ
+                          {seat.item.price_at_purchase.toLocaleString('vi-VN')}đ
                         </span>
                       </div>
                     );
@@ -276,9 +323,9 @@ export function CheckoutPage() {
 
               <button
                 onClick={handlePayment}
-                disabled={isProcessing}
+                disabled={isProcessing || !canSubmitPayment}
                 className={`w-full py-4 rounded-xl text-white font-semibold transition-all ${
-                  isProcessing
+                  isProcessing || !canSubmitPayment
                     ? 'bg-slate-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 hover:shadow-lg'
                 }`}
@@ -288,6 +335,8 @@ export function CheckoutPage() {
                     <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></div>
                     Đang xử lý...
                   </span>
+                ) : !canSubmitPayment ? (
+                  'Đơn hàng đã được xử lý'
                 ) : (
                   'Xác nhận thanh toán'
                 )}

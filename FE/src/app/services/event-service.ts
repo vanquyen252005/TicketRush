@@ -1,5 +1,5 @@
 import apiClient from "../api-client";
-import { Event } from "../data/utils";
+import { Event, SeatLayoutRequest } from "../types";
 
 export const eventService = {
   getAllEvents: async (): Promise<Event[]> => {
@@ -19,6 +19,11 @@ export const eventService = {
 
   updateEvent: async (id: string | number, eventData: Partial<Event>): Promise<Event> => {
     const response = await apiClient.put<Event>(`/api/admin/events/${id}`, eventData);
+    return response.data;
+  },
+
+  saveSeatLayout: async (id: string | number, layout: SeatLayoutRequest): Promise<Event> => {
+    const response = await apiClient.put<Event>(`/api/admin/events/${id}/seat-layout`, layout);
     return response.data;
   },
 

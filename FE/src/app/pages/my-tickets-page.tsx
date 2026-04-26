@@ -2,39 +2,56 @@ import { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router";
 import { useAuth } from "../hooks/use-auth";
 import { Ticket, MapPin, Calendar, Clock, QrCode, X } from "lucide-react";
-import { mockBookings, mockBookingItems } from "../data/utils";
 import { eventService } from "../services/event-service";
+import { bookingService } from "../services/booking-service";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { Booking } from "../types";
 
 export function MyTicketsPage() {
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
-  const { isAuthenticated, user, login } = useAuth();
+  const { isAuthenticated, login } = useAuth();
   const location = useLocation();
   const isAdminView = location.pathname.startsWith('/admin');
   const homeLink = isAdminView ? '/admin/view-home' : '/';
   const [events, setEvents] = useState<any[]>([]);
-  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchData = async () => {
       try {
-        const data = await eventService.getAllEvents();
-        setEvents(data);
+        const [eventData, bookingData] = await Promise.all([
+          eventService.getAllEvents(),
+          bookingService.getMyBookings(),
+        ]);
+        setEvents(eventData);
+        setBookings(bookingData);
       } catch (error) {
         console.error("Lỗi khi tải sự kiện:", error);
       } finally {
-        setIsLoadingEvents(false);
+        setIsLoading(false);
       }
     };
-    fetchEvents();
+    fetchData();
   }, []);
 
-  // Filter bookings for current user
-  const userBookings = mockBookings.filter(b => b.user_id === user?.id);
+  const userBookings = bookings;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case 'PENDING':
+        return (
+          <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">
+            Đang giữ chỗ
+          </span>
+        );
+      case 'EXPIRED':
+        return (
+          <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-semibold">
+            Đã hết hạn
+          </span>
+        );
       case 'UNUSED':
       case 'CONFIRMED':
         return (
@@ -74,7 +91,7 @@ export function MyTicketsPage() {
           </div>
         )}
 
-        {isLoadingEvents ? (
+        {isLoading ? (
           <div className="text-center py-20 animate-pulse">
             <h3 className="text-xl font-semibold text-slate-700">Đang tải thông tin vé...</h3>
           </div>
@@ -100,7 +117,7 @@ export function MyTicketsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {userBookings.map((booking) => {
               const event = events.find(e => e.id === booking.event_id);
-              const items = mockBookingItems.filter(item => item.booking_id === booking.id);
+              const items = booking.items || [];
               const eventDate = event ? new Date(event.startTime || event.start_time) : new Date();
 
               return (

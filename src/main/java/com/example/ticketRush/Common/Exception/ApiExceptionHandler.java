@@ -1,6 +1,11 @@
 package com.example.ticketRush.Common.Exception;
 
+import com.example.ticketRush.BookingModule.Exception.BookingAccessDeniedException;
+import com.example.ticketRush.BookingModule.Exception.BookingExpiredException;
+import com.example.ticketRush.BookingModule.Exception.BookingNotFoundException;
+import com.example.ticketRush.BookingModule.Exception.SeatUnavailableException;
 import com.example.ticketRush.EventModule.Exception.EventNotFoundException;
+import com.example.ticketRush.EventModule.Exception.SeatLayoutConflictException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +23,31 @@ public class ApiExceptionHandler {
     @ExceptionHandler(EventNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleEventNotFound(EventNotFoundException exception) {
         return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(BookingNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBookingNotFound(BookingNotFoundException exception) {
+        return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(BookingAccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleBookingAccessDenied(BookingAccessDeniedException exception) {
+        return buildResponse(HttpStatus.FORBIDDEN, exception.getMessage());
+    }
+
+    @ExceptionHandler(BookingExpiredException.class)
+    public ResponseEntity<Map<String, Object>> handleBookingExpired(BookingExpiredException exception) {
+        return buildResponse(HttpStatus.GONE, exception.getMessage());
+    }
+
+    @ExceptionHandler(SeatUnavailableException.class)
+    public ResponseEntity<Map<String, Object>> handleSeatUnavailable(SeatUnavailableException exception) {
+        return buildResponse(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(SeatLayoutConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleSeatLayoutConflict(SeatLayoutConflictException exception) {
+        return buildResponse(HttpStatus.CONFLICT, exception.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -158,7 +158,7 @@ export function HomePage() {
             {displayFeaturedEvents.map((event) => (
               <div 
                 key={event.id}
-                onClick={() => navigate(`/event/${event.id}`)}
+                onClick={() => navigate(`/event/${event.id}`, { state: { event } })}
                 className="flex-shrink-0 w-[300px] md:w-[420px] snap-start"
               >
                 <div className="relative aspect-[16/10] rounded-3xl overflow-hidden shadow-2xl group cursor-pointer border border-white/10 bg-slate-800 hover:scale-[1.02] transition-all duration-500">
