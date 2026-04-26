@@ -3,6 +3,7 @@ package com.example.ticketRush.EventModule.Dto.Response;
 import com.example.ticketRush.EventModule.Enum.EventStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record EventResponse(
         Long id,
@@ -14,6 +15,7 @@ public record EventResponse(
         LocalDateTime endTime,
         EventStatus status,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        List<ZoneResponse> zones
 ) {
 }

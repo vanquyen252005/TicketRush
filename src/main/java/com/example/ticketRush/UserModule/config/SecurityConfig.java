@@ -64,7 +64,9 @@ public class SecurityConfig {
                         // Public – Auth endpoints
                         .requestMatchers(
                                 "/api/auth/register",
-                                "/api/auth/refresh"
+                                "/api/auth/refresh",
+                                "/api/events",
+                                "/api/events/**"
                         ).permitAll()
                         // Public – OAuth2 flow
                         .requestMatchers(

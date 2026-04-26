@@ -5,6 +5,8 @@ import { mockEvents } from "../data/utils";
 import { EventCard } from "../components/event-card";
 import { checkBackendConnection } from "../check-connection";
 import { toast } from "sonner";
+import { eventService } from "../services/event-service";
+import { Event } from "../types";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -12,26 +14,29 @@ export function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("Tất cả");
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showRightArrow, setShowRightArrow] = useState(true);
+  const [events, setEvents] = useState<any[]>([]);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
 
   // Get suggestion events based on search query, or default latest 20
   const displayFeaturedEvents = searchQuery
-    ? mockEvents
+    ? events
         .filter(event => 
           event.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
           event.location.toLowerCase().includes(searchQuery.toLowerCase())
         )
-        .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+        .sort((a, b) => new Date(b.startTime || b.start_time).getTime() - new Date(a.startTime || a.start_time).getTime())
         .slice(0, 20)
-    : [...mockEvents]
-        .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+    : [...events]
+        .sort((a, b) => new Date(b.startTime || b.start_time).getTime() - new Date(a.startTime || a.start_time).getTime())
         .slice(0, 20);
 
   const categories = ["Tất cả", "Âm nhạc", "Thể thao", "FanMeeting"];
 
-  const filteredEvents = mockEvents.filter(event => {
+  const filteredEvents = events.filter(event => {
     const matchesSearch = event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          event.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "Tất cả" || event.category === selectedCategory;
+    const eventCategory = event.category || "Âm nhạc";
+    const matchesCategory = selectedCategory === "Tất cả" || eventCategory === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -50,6 +55,18 @@ export function HomePage() {
   };
 
   useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const data = await eventService.getAllEvents();
+        setEvents(data);
+      } catch (error) {
+        console.error("Lỗi khi tải sự kiện:", error);
+      } finally {
+        setIsLoadingEvents(false);
+      }
+    };
+    fetchEvents();
+
     const el = scrollRef.current;
     if (el) {
       el.addEventListener('scroll', handleScroll);
@@ -141,12 +158,12 @@ export function HomePage() {
             {displayFeaturedEvents.map((event) => (
               <div 
                 key={event.id}
-                onClick={() => navigate(`/event/${event.id}`)}
+                onClick={() => navigate(`/event/${event.id}`, { state: { event } })}
                 className="flex-shrink-0 w-[300px] md:w-[420px] snap-start"
               >
                 <div className="relative aspect-[16/10] rounded-3xl overflow-hidden shadow-2xl group cursor-pointer border border-white/10 bg-slate-800 hover:scale-[1.02] transition-all duration-500">
                   <img 
-                    src={event.image} 
+                    src={event.imageUrl || event.image} 
                     alt={event.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
@@ -154,7 +171,7 @@ export function HomePage() {
                   
                   <div className="absolute top-4 left-4">
                     <span className="px-3 py-1 bg-cyan-500 text-white text-xs font-bold rounded-full shadow-lg">
-                      {event.category}
+                      {event.category || "Âm nhạc"}
                     </span>
                   </div>
 

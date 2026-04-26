@@ -4,12 +4,22 @@ import com.example.ticketRush.EventModule.Dto.Request.EventRequest;
 import com.example.ticketRush.EventModule.Dto.Response.EventResponse;
 import com.example.ticketRush.EventModule.Entity.Event;
 
+import java.util.Collections;
+
 public final class EventMapper {
 
     private EventMapper() {
     }
 
     public static EventResponse toResponse(Event event) {
+        return toResponse(event, Collections.emptyList());
+    }
+
+    public static EventResponse toDetailedResponse(Event event) {
+        return toResponse(event, ZoneMapper.toResponses(event.getZones(), event.getId()));
+    }
+
+    private static EventResponse toResponse(Event event, java.util.List<com.example.ticketRush.EventModule.Dto.Response.ZoneResponse> zones) {
         return new EventResponse(
                 event.getId(),
                 event.getName(),
@@ -20,7 +30,8 @@ public final class EventMapper {
                 event.getEndTime(),
                 event.getStatus(),
                 event.getCreatedAt(),
-                event.getUpdatedAt()
+                event.getUpdatedAt(),
+                zones
         );
     }
 
