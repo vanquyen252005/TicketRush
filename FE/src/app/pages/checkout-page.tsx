@@ -6,6 +6,8 @@ import { bookingService } from "../services/booking-service";
 import { Booking } from "../types";
 import { isAxiosError } from "axios";
 import { toast } from "sonner";
+import { useAuth } from "../hooks/use-auth";
+import { QRCodeSVG } from "qrcode.react";
 
 export function CheckoutPage() {
   const navigate = useNavigate();
@@ -13,6 +15,7 @@ export function CheckoutPage() {
   const state = location.state as { bookingId?: string } | null;
   const searchParams = new URLSearchParams(location.search);
   const bookingId = searchParams.get("bookingId") || state?.bookingId;
+  const { user } = useAuth();
 
   const [timeLeft, setTimeLeft] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -46,11 +49,7 @@ export function CheckoutPage() {
 
     if (booking.status === "CONFIRMED") {
       setShowSuccess(true);
-      const timer = setTimeout(() => {
-        navigate("/my-tickets");
-      }, 1500);
-
-      return () => clearTimeout(timer);
+      return;
     }
 
     if (booking.status !== "PENDING" || !booking.expires_at) {
@@ -129,10 +128,6 @@ export function CheckoutPage() {
       const updatedBooking = await bookingService.confirmBooking(booking.id);
       setBooking(updatedBooking);
       setShowSuccess(true);
-
-      setTimeout(() => {
-        navigate("/my-tickets");
-      }, 3000);
     } catch (error) {
       const message = isAxiosError(error)
         ? (error.response?.data as any)?.error || (error.response?.data as any)?.message || error.message
@@ -144,22 +139,40 @@ export function CheckoutPage() {
   };
 
   if (showSuccess) {
+    const qrJsonData = JSON.stringify({
+      bookingId: booking.id,
+      user: { name: user?.full_name, phone: user?.phone_number || '' },
+      event: { name: event?.name, time: event?.startTime || event?.start_time, location: event?.location },
+      seats: selectedSeats.map(s => `${s.seat.row_label}${s.seat.seat_number}`).join(', '),
+      status: "Đã đặt vé thành công",
+      amount: totalAmount
+    });
+    const qrData = `${window.location.origin}/ticket/verify?data=${btoa(encodeURIComponent(qrJsonData))}`;
+
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-cyan-50">
-        <div className="text-center">
-          <div className="w-24 h-24 mx-auto mb-6 bg-green-500 rounded-full flex items-center justify-center animate-bounce">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-cyan-50 py-12">
+        <div className="text-center w-full max-w-md px-4">
+          <div className="w-24 h-24 mx-auto mb-6 bg-green-500 rounded-full flex items-center justify-center animate-bounce shadow-lg shadow-green-500/30">
             <CheckCircle2 className="w-16 h-16 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-slate-800 mb-4">
+          <h1 className="text-4xl font-bold text-slate-800 mb-2">
             Đặt vé thành công!
           </h1>
-          <p className="text-xl text-slate-600 mb-8">
-            Vé điện tử đã được gửi về email của bạn
-          </p>
-          <div className="inline-flex items-center gap-2 text-slate-600">
-            <div className="animate-spin w-5 h-5 border-2 border-cyan-600 border-t-transparent rounded-full"></div>
-            <span>Đang chuyển hướng...</span>
+
+          <div className="bg-white p-6 rounded-2xl shadow-xl mb-8 flex flex-col items-center">
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-4 w-full">
+              <QRCodeSVG value={qrData} size={200} level="M" className="mx-auto" />
+            </div>
+            <p className="text-sm font-semibold text-slate-700">Mã vé điện tử</p>
+            <p className="text-xs text-slate-500 mt-1">Dùng mã này để check-in tại sự kiện</p>
           </div>
+
+          <button
+            onClick={() => navigate("/my-tickets")}
+            className="w-full py-4 bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all shadow-lg shadow-cyan-500/20"
+          >
+            Trở về xem vé của tôi
+          </button>
         </div>
       </div>
     );
@@ -169,11 +182,10 @@ export function CheckoutPage() {
     <div className="min-h-screen bg-slate-50 py-12">
       <div className="container mx-auto px-4">
         {/* Timer Warning */}
-        <div className={`mb-6 p-4 rounded-xl border-2 flex items-center justify-center gap-3 ${
-          timeLeft < 60 
-            ? 'bg-red-50 border-red-300 text-red-700' 
+        <div className={`mb-6 p-4 rounded-xl border-2 flex items-center justify-center gap-3 ${timeLeft < 60
+            ? 'bg-red-50 border-red-300 text-red-700'
             : 'bg-yellow-50 border-yellow-300 text-yellow-700'
-        }`}>
+          }`}>
           <Clock className="w-5 h-5" />
           <span className="font-semibold">
             Thời gian giữ chỗ còn: {minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}
@@ -216,7 +228,7 @@ export function CheckoutPage() {
                     return (
                       <div key={seat.item.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div 
+                          <div
                             className="w-4 h-4 rounded"
                             style={{ backgroundColor: zone?.color_hex }}
                           ></div>
@@ -304,17 +316,17 @@ export function CheckoutPage() {
                   <CreditCard className="w-5 h-5" />
                   Phương thức thanh toán
                 </h4>
-                
+
                 <button className="w-full p-3 border-2 border-cyan-500 bg-cyan-50 rounded-lg text-left hover:bg-cyan-100 transition-colors">
                   <div className="font-semibold text-cyan-700">VNPay</div>
                   <div className="text-xs text-cyan-600">Ví điện tử VNPay</div>
                 </button>
-                
+
                 <button className="w-full p-3 border-2 border-slate-200 rounded-lg text-left hover:bg-slate-50 transition-colors">
                   <div className="font-semibold text-slate-700">Momo</div>
                   <div className="text-xs text-slate-500">Ví điện tử Momo</div>
                 </button>
-                
+
                 <button className="w-full p-3 border-2 border-slate-200 rounded-lg text-left hover:bg-slate-50 transition-colors">
                   <div className="font-semibold text-slate-700">Thẻ tín dụng</div>
                   <div className="text-xs text-slate-500">Visa, Mastercard</div>
@@ -324,11 +336,10 @@ export function CheckoutPage() {
               <button
                 onClick={handlePayment}
                 disabled={isProcessing || !canSubmitPayment}
-                className={`w-full py-4 rounded-xl text-white font-semibold transition-all ${
-                  isProcessing || !canSubmitPayment
+                className={`w-full py-4 rounded-xl text-white font-semibold transition-all ${isProcessing || !canSubmitPayment
                     ? 'bg-slate-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 hover:shadow-lg'
-                }`}
+                  }`}
               >
                 {isProcessing ? (
                   <span className="flex items-center justify-center gap-2">

@@ -4,6 +4,7 @@ import { HomePage } from "./pages/home-page";
 import { EventDetailPage } from "./pages/event-detail-page";
 import { CheckoutPage } from "./pages/checkout-page";
 import { MyTicketsPage } from "./pages/my-tickets-page";
+import { TicketVerifyPage } from "./pages/ticket-verify-page";
 import { AdminLayout } from "./components/layouts/admin-layout";
 import { AdminDashboard } from "./pages/admin/admin-dashboard";
 import { AdminEventsPage } from "./pages/admin/admin-events-page";
@@ -68,6 +69,10 @@ export const router = createBrowserRouter([
   {
     path: "/admin/login",
     Component: AdminLoginPage,
+  },
+  {
+    path: "/ticket/verify",
+    Component: TicketVerifyPage,
   },
   {
     path: "*",
