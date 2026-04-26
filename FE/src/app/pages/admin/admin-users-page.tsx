@@ -1,11 +1,41 @@
-import { useState } from "react";
-import { Users, Search, Mail, Phone, Calendar, MoreVertical, Ban, CheckCircle } from "lucide-react";
-import { mockUsersList } from "../../data/utils";
+import { useState, useEffect } from "react";
+import { Users, Search, Mail, Phone, Calendar, MoreVertical, Ban, CheckCircle, Loader2 } from "lucide-react";
+import { User } from "../../types";
+import { userService } from "../../services/user-service";
 
 export function AdminUsersPage() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredUsers = mockUsersList.filter(user => 
+  // 🔄 Load dữ liệu từ API khi trang được mount và tự động cập nhật
+  useEffect(() => {
+    const fetchUsers = async (showLoader = true) => {
+      try {
+        if (showLoader) setLoading(true);
+        const data = await userService.getUsers();
+        setUsers(data);
+      } catch (error) {
+        console.error("Failed to fetch users", error);
+      } finally {
+        if (showLoader) setLoading(false);
+      }
+    };
+
+    // Load lần đầu tiên
+    fetchUsers(true);
+
+    // Thiết lập tự động refresh dữ liệu ngầm mỗi 5 giây
+    const intervalId = setInterval(() => {
+      fetchUsers(false);
+    }, 5000);
+
+    // Cleanup interval khi component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
+  // 🔍 Lọc danh sách theo từ khóa tìm kiếm
+  const filteredUsers = users.filter(user =>
     user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -13,7 +43,6 @@ export function AdminUsersPage() {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'ADMIN': return 'bg-purple-100 text-purple-700 border-purple-200';
-      case 'ORGANIZER': return 'bg-cyan-100 text-cyan-700 border-cyan-200';
       case 'CUSTOMER': return 'bg-slate-100 text-slate-700 border-slate-200';
       default: return 'bg-slate-100 text-slate-700 border-slate-200';
     }
@@ -46,7 +75,19 @@ export function AdminUsersPage() {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden min-h-[400px] relative">
+        {loading ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 backdrop-blur-sm z-10">
+            <Loader2 className="w-10 h-10 text-cyan-500 animate-spin mb-4" />
+            <p className="text-slate-500 font-medium">Đang tải danh sách người dùng...</p>
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <Users className="w-12 h-12 text-slate-200 mb-4" />
+            <p className="text-slate-500 font-medium">Không tìm thấy người dùng nào</p>
+          </div>
+        ) : null}
+
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>

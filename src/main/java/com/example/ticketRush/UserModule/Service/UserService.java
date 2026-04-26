@@ -12,4 +12,14 @@ public interface UserService {
      * Tìm user bằng email hoặc username (case-insensitive).
      */
     Optional<User> findByIdentifier(String identifier);
+
+    /**
+     * Lấy danh sách users từ Keycloak và ghi ra file JSON
+     */
+    void exportUsersToJsonFile(String filePath);
+
+    /**
+     * Lấy danh sách users trực tiếp từ Keycloak (không qua file trung gian)
+     */
+    java.util.List<java.util.Map<String, Object>> getAllKeycloakUsers();
 }
