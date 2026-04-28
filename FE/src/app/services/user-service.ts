@@ -11,12 +11,41 @@ export const userService = {
    */
   async getUsers(): Promise<User[]> {
     try {
-      // Gọi API GET /api/admin/users đã tạo ở Backend
       const response = await apiClient.get<User[]>("/api/admin/users");
       return response.data;
     } catch (error) {
       console.error("Lỗi khi lấy danh sách user:", error);
       throw error;
     }
+  },
+
+  async createUser(data: {
+    username: string;
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    role: string;
+    gender: string;
+    dateOfBirth: string;
+  }): Promise<void> {
+    await apiClient.post("/api/admin/users", data);
+  },
+
+  async updateUser(userId: string, data: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    role: string;
+    gender: string;
+    dateOfBirth: string;
+  }): Promise<void> {
+    await apiClient.put(`/api/admin/users/${userId}`, data);
+  },
+
+  async deleteUser(userId: string): Promise<void> {
+    await apiClient.delete(`/api/admin/users/${userId}`);
   },
 };

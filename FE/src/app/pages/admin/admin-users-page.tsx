@@ -11,7 +11,11 @@ import {
   Loader2,
   Eye,
   X,
-  Ticket
+  Ticket,
+  UserPlus,
+  Trash2,
+  AlertTriangle,
+  EyeOff
 } from "lucide-react";
 import { User, AdminBooking } from "../../types";
 import { userService } from "../../services/user-service";
@@ -29,6 +33,36 @@ export function AdminUsersPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userBookings, setUserBookings] = useState<AdminBooking[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createForm, setCreateForm] = useState({
+    username: '',
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    role: 'CUSTOMER',
+    gender: '',
+    dateOfBirth: ''
+  });
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    id: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    role: 'CUSTOMER',
+    gender: '',
+    dateOfBirth: ''
+  });
 
   // Fetch bookings when a user is selected
   useEffect(() => {
@@ -119,6 +153,129 @@ export function AdminUsersPage() {
     }
   };
 
+  const handleCreateUser = async () => {
+    if (!createForm.username.trim() || !createForm.email.trim() || !createForm.password.trim()) {
+      setCreateError('Username, email và mật khẩu không được để trống');
+      return;
+    }
+    if (createForm.password.length < 6) {
+      setCreateError('Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+    setIsCreating(true);
+    setCreateError(null);
+    try {
+      // Format date to mm/dd/yyyy as required by Keycloak
+      let formattedDob = createForm.dateOfBirth;
+      if (formattedDob && formattedDob.includes('-')) {
+        const parts = formattedDob.split('-');
+        if (parts.length === 3) {
+          formattedDob = `${parts[1]}/${parts[2]}/${parts[0]}`;
+        }
+      }
+
+      await userService.createUser({
+        ...createForm,
+        dateOfBirth: formattedDob
+      });
+      setShowCreateModal(false);
+      setCreateForm({ username: '', email: '', password: '', firstName: '', lastName: '', phoneNumber: '', role: 'CUSTOMER', gender: '', dateOfBirth: '' });
+      // Refresh user list
+      const data = await userService.getUsers();
+      setUsers(data);
+    } catch (error: any) {
+      const msg = error?.response?.data?.error || error?.message || 'Không thể tạo người dùng';
+      setCreateError(msg);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    setDeletingUserId(userId);
+    try {
+      await userService.deleteUser(userId);
+      setUsers(users.filter(u => u.id !== userId));
+      setUserToDelete(null); // Close modal on success
+    } catch (error: any) {
+      const msg = error?.response?.data?.error || error?.message || 'Không thể xóa người dùng';
+      alert(msg);
+    } finally {
+      setDeletingUserId(null);
+    }
+  };
+
+  const openEditModal = (user: User) => {
+    // Tách full_name thành first/last name đơn giản để edit
+    const names = user.full_name.split(' ');
+    const firstName = names[0] || '';
+    const lastName = names.slice(1).join(' ') || '';
+
+    let formattedDob = '';
+    if (user.date_of_birth && user.date_of_birth !== 'N/A') {
+      if (user.date_of_birth.includes('/')) {
+        const parts = user.date_of_birth.split('/');
+        if (parts.length === 3) {
+           // Parse mm/dd/yyyy to yyyy-MM-dd
+           let year = parts[2];
+           if (year.length === 2) {
+             const y = parseInt(year, 10);
+             year = (y > 50 ? '19' : '20') + year;
+           }
+           formattedDob = `${year}-${parts[0].padStart(2, '0')}-${parts[1].padStart(2, '0')}`;
+        }
+      } else {
+         formattedDob = user.date_of_birth;
+      }
+    }
+
+    setEditForm({
+      id: user.id,
+      email: user.email,
+      firstName: firstName,
+      lastName: lastName,
+      phoneNumber: user.phone_number !== 'N/A' ? user.phone_number : '',
+      role: user.role === 'ROLE_ADMIN' ? 'ADMIN' : user.role,
+      gender: user.gender && user.gender !== 'N/A' ? user.gender : '',
+      dateOfBirth: formattedDob
+    });
+    setEditError(null);
+    setShowEditModal(true);
+  };
+
+  const handleEditUser = async () => {
+    if (!editForm.email.trim()) {
+      setEditError('Email không được để trống');
+      return;
+    }
+    setIsEditing(true);
+    setEditError(null);
+    try {
+      // Format date to mm/dd/yyyy as required by Keycloak
+      let formattedDob = editForm.dateOfBirth;
+      if (formattedDob && formattedDob.includes('-')) {
+        const parts = formattedDob.split('-');
+        if (parts.length === 3) {
+          formattedDob = `${parts[1]}/${parts[2]}/${parts[0]}`;
+        }
+      }
+
+      await userService.updateUser(editForm.id, {
+        ...editForm,
+        dateOfBirth: formattedDob
+      });
+      setShowEditModal(false);
+      // Refresh list
+      const data = await userService.getUsers();
+      setUsers(data);
+    } catch (error: any) {
+      const msg = error?.response?.data?.error || error?.message || 'Không thể cập nhật người dùng';
+      setEditError(msg);
+    } finally {
+      setIsEditing(false);
+    }
+  };
+
   // Tính toán số liệu cho Header Cards
   const totalUsers = users.length;
   const customerUsers = users.filter(u => u.role !== 'ADMIN' && u.role !== 'ROLE_ADMIN').length;
@@ -126,11 +283,20 @@ export function AdminUsersPage() {
 
   return (
     <div className="space-y-6 p-6 font-sans">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-bold text-slate-800">
-          Quản lý người dùng
-        </h2>
-        <p className="text-sm text-slate-500 font-medium">Danh sách người dùng thật, mở chi tiết để xem vé và giao dịch của từng người.</p>
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-bold text-slate-800">
+            Quản lý người dùng
+          </h2>
+          <p className="text-sm text-slate-500 font-medium">Danh sách người dùng thật, mở chi tiết để xem vé và giao dịch của từng người.</p>
+        </div>
+        <button
+          onClick={() => { setShowCreateModal(true); setCreateError(null); }}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-sm font-bold rounded-full hover:from-cyan-700 hover:to-blue-700 transition-all shadow-sm"
+        >
+          <UserPlus className="w-4 h-4" />
+          Thêm người dùng
+        </button>
       </div>
 
       {/* Top Statistic Cards */}
@@ -296,15 +462,37 @@ export function AdminUsersPage() {
                     <td className="py-4 px-6">
                       <div className="text-xs font-bold text-slate-600 flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        26/04/2026
+                        {user.created_at ? new Date(user.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '---'}
                       </div>
                     </td>
                     <td className="py-4 px-6 text-center">
-                      <button
-                        className="p-2 text-slate-400 group-hover/row:text-cyan-600 group-hover/row:bg-cyan-50 rounded-full transition-colors focus:outline-none"
-                      >
-                        <Eye className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditModal(user);
+                          }}
+                          className="p-2 text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-full transition-colors focus:outline-none"
+                          title="Chỉnh sửa thông tin"
+                        >
+                          <MoreVertical className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUserToDelete(user);
+                          }}
+                          disabled={deletingUserId === user.id}
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors focus:outline-none disabled:opacity-50"
+                          title="Xóa người dùng"
+                        >
+                          {deletingUserId === user.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin text-red-600" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -348,14 +536,32 @@ export function AdminUsersPage() {
                 <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
                   <Users className="w-4 h-4 text-cyan-600" /> Hồ sơ cá nhân
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
                   <div>
                     <p className="text-xs font-bold text-slate-500 mb-1">Email</p>
                     <p className="text-sm font-semibold text-slate-800">{selectedUser.email}</p>
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-500 mb-1">Số điện thoại</p>
-                    <p className="text-sm font-semibold text-slate-800">{selectedUser.phone_number || "Chưa cập nhật"}</p>
+                    <p className="text-sm font-semibold text-slate-800">{selectedUser.phone_number && selectedUser.phone_number !== 'N/A' ? selectedUser.phone_number : "Chưa cập nhật"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-500 mb-1">Giới tính</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {selectedUser.gender === 'MALE' ? 'Nam' : selectedUser.gender === 'FEMALE' ? 'Nữ' : selectedUser.gender === 'OTHER' ? 'Khác' : "Chưa cập nhật"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-500 mb-1">Ngày sinh</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {(() => {
+                        const dob = selectedUser.date_of_birth;
+                        if (!dob || dob === 'N/A') return "Chưa cập nhật";
+                        if (dob.includes('/')) return dob; // Trả về dd/mm/yyyy nguyên bản
+                        const d = new Date(dob);
+                        return !isNaN(d.getTime()) ? d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : dob;
+                      })()}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-500 mb-1">Trạng thái</p>
@@ -366,7 +572,9 @@ export function AdminUsersPage() {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-slate-500 mb-1">Ngày tham gia</p>
-                    <p className="text-sm font-semibold text-slate-800">26/04/2026</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '---'}
+                    </p>
                   </div>
                 </div>
               </section>
@@ -411,9 +619,9 @@ export function AdminUsersPage() {
                         <div className="text-right flex-shrink-0">
                           <p className="text-sm font-bold text-slate-800">{booking.total_amount.toLocaleString()}đ</p>
                           <p className={`text-[10px] font-bold px-2 py-0.5 rounded-md inline-block mt-1 ${booking.status === 'CONFIRMED' ? 'text-emerald-600 bg-emerald-50' :
-                              booking.status === 'PENDING' ? 'text-amber-600 bg-amber-50' :
-                                booking.status === 'CANCELLED' ? 'text-rose-600 bg-rose-50' :
-                                  'text-slate-600 bg-slate-50'
+                            booking.status === 'PENDING' ? 'text-amber-600 bg-amber-50' :
+                              booking.status === 'CANCELLED' ? 'text-rose-600 bg-rose-50' :
+                                'text-slate-600 bg-slate-50'
                             }`}>
                             {booking.status === 'CONFIRMED' ? 'Đã thanh toán' :
                               booking.status === 'PENDING' ? 'Chờ thanh toán' :
@@ -427,6 +635,369 @@ export function AdminUsersPage() {
                 )}
               </section>
 
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setShowCreateModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">Thêm người dùng mới</h3>
+                <p className="text-sm text-slate-500 mt-1">Tạo tài khoản mới trong hệ thống Keycloak</p>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {createError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700 font-medium">
+                {createError}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Họ</label>
+                  <input
+                    type="text"
+                    value={createForm.firstName}
+                    onChange={(e) => setCreateForm({ ...createForm, firstName: e.target.value })}
+                    placeholder="Nguyễn"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tên</label>
+                  <input
+                    type="text"
+                    value={createForm.lastName}
+                    onChange={(e) => setCreateForm({ ...createForm, lastName: e.target.value })}
+                    placeholder="Văn A"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Username <span className="text-red-400">*</span></label>
+                <input
+                  type="text"
+                  value={createForm.username}
+                  onChange={(e) => setCreateForm({ ...createForm, username: e.target.value })}
+                  placeholder="nguyenvana"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email <span className="text-red-400">*</span></label>
+                <input
+                  type="email"
+                  value={createForm.email}
+                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                  placeholder="nguyenvana@email.com"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Mật khẩu <span className="text-red-400">*</span></label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={createForm.password}
+                    onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                    placeholder="Tối thiểu 6 ký tự"
+                    autoComplete="new-password"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-cyan-600 focus:outline-none"
+                    title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Số điện thoại</label>
+                <input
+                  type="tel"
+                  value={createForm.phoneNumber}
+                  onChange={(e) => setCreateForm({ ...createForm, phoneNumber: e.target.value })}
+                  placeholder="0912 345 678"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Giới tính</label>
+                  <select
+                    value={createForm.gender}
+                    onChange={(e) => setCreateForm({ ...createForm, gender: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all bg-white"
+                  >
+                    <option value="">Chọn giới tính</option>
+                    <option value="MALE">Nam</option>
+                    <option value="FEMALE">Nữ</option>
+                    <option value="OTHER">Khác</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Ngày sinh <span className="text-red-400">*</span></label>
+                  <input
+                    type="date"
+                    value={createForm.dateOfBirth}
+                    onChange={(e) => setCreateForm({ ...createForm, dateOfBirth: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Vai trò</label>
+                <select
+                  value={createForm.role}
+                  onChange={(e) => setCreateForm({ ...createForm, role: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all bg-white"
+                >
+                  <option value="CUSTOMER">Khách hàng</option>
+                  <option value="ADMIN">Quản trị viên</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleCreateUser}
+                disabled={isCreating}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-sm font-bold hover:from-cyan-700 hover:to-blue-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isCreating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Đang tạo...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4" />
+                    Tạo người dùng
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {userToDelete && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => !deletingUserId && setUserToDelete(null)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-red-50 p-6 flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4">
+                <AlertTriangle className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Xác nhận xóa người dùng</h3>
+              <p className="text-sm text-slate-600">
+                Bạn có chắc chắn muốn xóa người dùng <strong className="text-slate-800">{userToDelete.full_name}</strong> ({userToDelete.email})?
+                <br /><br />
+                <span className="text-red-600 font-medium">Hành động này không thể hoàn tác và sẽ xóa vĩnh viễn tài khoản khỏi hệ thống.</span>
+              </p>
+            </div>
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+              <button
+                onClick={() => setUserToDelete(null)}
+                disabled={!!deletingUserId}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => handleDeleteUser(userToDelete.id)}
+                disabled={!!deletingUserId}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {deletingUserId ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Đang xóa...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Xóa ngay
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setShowEditModal(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-bold text-slate-800">Chỉnh sửa thông tin</h3>
+                <p className="text-sm text-slate-500 mt-1">Cập nhật dữ liệu người dùng trên hệ thống</p>
+              </div>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {editError && (
+              <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700 font-medium">
+                {editError}
+              </div>
+            )}
+
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Họ</label>
+                  <input
+                    type="text"
+                    value={editForm.firstName}
+                    onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tên</label>
+                  <input
+                    type="text"
+                    value={editForm.lastName}
+                    onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email <span className="text-red-400">*</span></label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Số điện thoại</label>
+                <input
+                  type="tel"
+                  value={editForm.phoneNumber}
+                  onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Giới tính</label>
+                  <select
+                    value={editForm.gender}
+                    onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all bg-white"
+                  >
+                    <option value="">Chọn giới tính</option>
+                    <option value="MALE">Nam</option>
+                    <option value="FEMALE">Nữ</option>
+                    <option value="OTHER">Khác</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Ngày sinh</label>
+                  <input
+                    type="date"
+                    value={editForm.dateOfBirth}
+                    onChange={(e) => setEditForm({ ...editForm, dateOfBirth: e.target.value })}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Vai trò</label>
+                <select
+                  value={editForm.role}
+                  onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all bg-white"
+                >
+                  <option value="CUSTOMER">Khách hàng</option>
+                  <option value="ADMIN">Quản trị viên</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleEditUser}
+                disabled={isEditing}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-sm font-bold hover:from-cyan-700 hover:to-blue-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isEditing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Đang lưu...
+                  </>
+                ) : (
+                  <>
+                    Lưu thay đổi
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
