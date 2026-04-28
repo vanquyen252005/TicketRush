@@ -46,6 +46,14 @@ public class AdminBookingServiceImpl implements AdminBookingService {
         return toResponse(booking);
     }
 
+    @Override
+    public List<AdminBookingResponse> getBookingsByEmail(String email) {
+        return bookingRepository.findDetailedByUserEmailOrderByCreatedAtDesc(email)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
     private AdminBookingResponse toResponse(Booking booking) {
         return new AdminBookingResponse(
                 booking.getId(),

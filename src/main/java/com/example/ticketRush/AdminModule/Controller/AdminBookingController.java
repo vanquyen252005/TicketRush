@@ -20,7 +20,13 @@ public class AdminBookingController {
     private final AdminBookingService adminBookingService;
 
     @GetMapping
-    public List<AdminBookingResponse> getBookings(@RequestParam(required = false) UUID userId) {
+    public List<AdminBookingResponse> getBookings(
+            @RequestParam(required = false) UUID userId,
+            @RequestParam(required = false) String email
+    ) {
+        if (email != null && !email.isBlank()) {
+            return adminBookingService.getBookingsByEmail(email);
+        }
         return userId == null ? adminBookingService.getBookings() : adminBookingService.getBookings(userId);
     }
 

@@ -11,4 +11,6 @@ public interface AdminBookingService {
     List<AdminBookingResponse> getBookings(java.util.UUID userId);
 
     AdminBookingResponse getBooking(UUID bookingId);
+
+    List<AdminBookingResponse> getBookingsByEmail(String email);
 }

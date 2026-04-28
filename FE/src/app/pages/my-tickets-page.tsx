@@ -37,7 +37,7 @@ export function MyTicketsPage() {
     fetchData();
   }, []);
 
-  const userBookings = bookings;
+  const userBookings = bookings.filter(b => b.status === 'CONFIRMED');
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -176,6 +176,15 @@ export function MyTicketsPage() {
                         {booking.total_amount.toLocaleString('vi-VN')}đ
                       </span>
                     </div>
+
+                    {booking.updated_at && booking.status === 'CONFIRMED' && (
+                      <div className="flex items-center justify-between pb-4 mb-4 border-b border-dashed">
+                        <span className="text-slate-600 text-sm">Thời gian đặt vé</span>
+                        <span className="text-sm font-semibold text-slate-700">
+                          {new Date(booking.updated_at).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    )}
 
                     <button
                       onClick={() => {

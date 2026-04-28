@@ -58,6 +58,19 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
             left join fetch b.items i
             left join fetch i.seat s
             left join fetch s.zone
+            where lower(b.user.email) = lower(:email)
+            order by b.createdAt desc
+            """)
+    List<Booking> findDetailedByUserEmailOrderByCreatedAtDesc(@Param("email") String email);
+
+    @Query("""
+            select distinct b
+            from Booking b
+            left join fetch b.event
+            left join fetch b.user
+            left join fetch b.items i
+            left join fetch i.seat s
+            left join fetch s.zone
             where b.status = com.example.ticketRush.BookingModule.Enum.BookingStatus.PAID
             order by b.createdAt desc
             """)
