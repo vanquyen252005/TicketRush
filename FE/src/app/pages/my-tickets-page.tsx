@@ -4,13 +4,21 @@ import { useAuth } from "../hooks/use-auth";
 import { Ticket, MapPin, Calendar, Clock, QrCode, X } from "lucide-react";
 import { eventService } from "../services/event-service";
 import { bookingService } from "../services/booking-service";
+import { paymentService } from "../services/payment-service";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Booking } from "../types";
+import { Booking, PaymentTransaction } from "../types";
 import { QRCodeSVG } from "qrcode.react";
+import {
+  buildTicketQrPayload,
+  buildTicketQrReceiptText,
+  buildTicketVerifyUrl,
+} from "../utils/ticket-qr";
 
 export function MyTicketsPage() {
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = useState<PaymentTransaction | null>(null);
+  const [transactionLoading, setTransactionLoading] = useState(false);
   const { isAuthenticated, login, user } = useAuth();
   const location = useLocation();
   const isAdminView = location.pathname.startsWith('/admin');
@@ -36,6 +44,48 @@ export function MyTicketsPage() {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadTransaction = async () => {
+      if (!selectedTicket) {
+        setSelectedTransaction(null);
+        setTransactionLoading(false);
+        return;
+      }
+
+      const booking = bookings.find((item) => item.id === selectedTicket);
+      if (!booking || booking.status !== "CONFIRMED") {
+        setSelectedTransaction(null);
+        setTransactionLoading(false);
+        return;
+      }
+
+      setTransactionLoading(true);
+      try {
+        const transaction = await paymentService.getTransactionByBookingId(booking.id);
+        if (active) {
+          setSelectedTransaction(transaction);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải thông tin giao dịch:", error);
+        if (active) {
+          setSelectedTransaction(null);
+        }
+      } finally {
+        if (active) {
+          setTransactionLoading(false);
+        }
+      }
+    };
+
+    loadTransaction();
+
+    return () => {
+      active = false;
+    };
+  }, [bookings, selectedTicket]);
 
   const userBookings = bookings.filter(b => b.status === 'CONFIRMED');
 
@@ -228,15 +278,17 @@ export function MyTicketsPage() {
         {selectedTicket && (() => {
           const booking = bookings.find(b => b.id === selectedTicket);
           const event = events.find(e => e.id === booking?.event_id);
-          const qrJsonData = JSON.stringify({
-            bookingId: booking?.id,
-            user: { name: user?.full_name, phone: user?.phone_number || '' },
-            event: { name: event?.name, time: event?.startTime || event?.start_time, location: event?.location },
-            seats: booking?.items?.map((i: any) => i.seat_label).join(', ') || '',
-            status: "Đã đặt vé thành công",
-            amount: booking?.total_amount
-          });
-          const qrData = `${window.location.origin}/ticket/verify?data=${btoa(encodeURIComponent(qrJsonData))}`;
+          const qrPayload = booking && event
+            ? buildTicketQrPayload({
+                booking,
+                event,
+                seats: booking.items?.map((item) => item.seat_label) || [],
+                user,
+                transaction: selectedTransaction,
+              })
+            : null;
+          const verifyUrl = qrPayload ? buildTicketVerifyUrl(qrPayload) : null;
+          const qrData = qrPayload ? buildTicketQrReceiptText(qrPayload) : "";
 
           return (
             <div
@@ -260,19 +312,43 @@ export function MyTicketsPage() {
                 <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-8 mb-6">
                   <div className="bg-white p-4 rounded-lg shadow-lg">
                     <div className="w-full aspect-square bg-white rounded-lg flex items-center justify-center">
-                      <QRCodeSVG value={qrData} className="w-full h-full" level="M" />
+                      {transactionLoading || !qrPayload ? (
+                        <div className="flex flex-col items-center justify-center text-slate-500 gap-3">
+                          <div className="w-8 h-8 border-4 border-cyan-600 border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-sm font-medium">Đang tải thông tin giao dịch...</span>
+                        </div>
+                      ) : (
+                        <QRCodeSVG value={qrData} className="w-full h-full" level="M" />
+                      )}
                     </div>
                   </div>
                 </div>
 
               <div className="text-center space-y-2">
                 <p className="text-slate-600">
-                  Vui lòng xuất trình mã QR này tại cổng
+                  Quét mã để xem thông tin đơn hàng và giao dịch
                 </p>
                 <p className="font-mono font-bold text-cyan-600 text-lg">
                   {selectedTicket.substring(0, 8).toUpperCase()}
                 </p>
               </div>
+
+                {!transactionLoading && booking && !selectedTransaction && (
+                  <div className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+                    Chưa tải được chi tiết giao dịch, QR vẫn hiển thị thông tin đơn hàng.
+                  </div>
+                )}
+
+                {verifyUrl && (
+                  <a
+                    href={verifyUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-5 inline-flex w-full items-center justify-center rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 hover:bg-cyan-100 transition-colors"
+                  >
+                    Mở trang xác minh
+                  </a>
+                )}
 
                 <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-sm text-yellow-800 text-center">

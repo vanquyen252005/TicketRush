@@ -3,11 +3,17 @@ import { useNavigate, useLocation } from "react-router";
 import { Clock, CreditCard, MapPin, Calendar, CheckCircle2 } from "lucide-react";
 import { eventService } from "../services/event-service";
 import { bookingService } from "../services/booking-service";
-import { Booking } from "../types";
+import { paymentService } from "../services/payment-service";
+import { Booking, PaymentTransaction } from "../types";
 import { isAxiosError } from "axios";
 import { toast } from "sonner";
 import { useAuth } from "../hooks/use-auth";
 import { QRCodeSVG } from "qrcode.react";
+import {
+  buildTicketQrPayload,
+  buildTicketQrReceiptText,
+  buildTicketVerifyUrl,
+} from "../utils/ticket-qr";
 
 export function CheckoutPage() {
   const navigate = useNavigate();
@@ -22,20 +28,36 @@ export function CheckoutPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [event, setEvent] = useState<any>(null);
   const [booking, setBooking] = useState<Booking | null>(null);
+  const [paymentTransaction, setPaymentTransaction] = useState<PaymentTransaction | null>(null);
+  const [transactionReady, setTransactionReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
         if (!bookingId) return;
+        setTransactionReady(false);
         const bookingData = await bookingService.getBookingById(bookingId);
         setBooking(bookingData);
 
         const data = await eventService.getEventById(Number(bookingData.event_id));
         setEvent(data);
+
+        if (bookingData.status === "CONFIRMED") {
+          try {
+            const transactionData = await paymentService.getTransactionByBookingId(bookingData.id);
+            setPaymentTransaction(transactionData);
+          } catch (transactionError) {
+            console.error("Lỗi khi tải thông tin giao dịch:", transactionError);
+            setPaymentTransaction(null);
+          }
+        } else {
+          setPaymentTransaction(null);
+        }
       } catch (error) {
         console.error("Lỗi khi tải sự kiện:", error);
       } finally {
+        setTransactionReady(true);
         setIsLoading(false);
       }
     };
@@ -48,7 +70,9 @@ export function CheckoutPage() {
     }
 
     if (booking.status === "CONFIRMED") {
-      setShowSuccess(true);
+      if (transactionReady) {
+        setShowSuccess(true);
+      }
       return;
     }
 
@@ -73,7 +97,7 @@ export function CheckoutPage() {
     const timer = setInterval(updateTimer, 1000);
 
     return () => clearInterval(timer);
-  }, [booking, navigate]);
+  }, [booking, transactionReady, navigate]);
 
   if (isLoading) {
     return (
@@ -122,12 +146,20 @@ export function CheckoutPage() {
     }
 
     setIsProcessing(true);
+    setTransactionReady(false);
 
     try {
       await new Promise(resolve => setTimeout(resolve, 1200));
       const updatedBooking = await bookingService.confirmBooking(booking.id);
-      setBooking(updatedBooking);
-      setShowSuccess(true);
+      try {
+        const transactionData = await paymentService.getTransactionByBookingId(updatedBooking.id);
+        setBooking(updatedBooking);
+        setPaymentTransaction(transactionData);
+      } catch (transactionError) {
+        console.error("Lỗi khi tải thông tin giao dịch:", transactionError);
+        setBooking(updatedBooking);
+        setPaymentTransaction(null);
+      }
     } catch (error) {
       const message = isAxiosError(error)
         ? (error.response?.data as any)?.error || (error.response?.data as any)?.message || error.message
@@ -135,19 +167,20 @@ export function CheckoutPage() {
       toast.error(message);
     } finally {
       setIsProcessing(false);
+      setTransactionReady(true);
     }
   };
 
   if (showSuccess) {
-    const qrJsonData = JSON.stringify({
-      bookingId: booking.id,
-      user: { name: user?.full_name, phone: user?.phone_number || '' },
-      event: { name: event?.name, time: event?.startTime || event?.start_time, location: event?.location },
-      seats: selectedSeats.map(s => `${s.seat.row_label}${s.seat.seat_number}`).join(', '),
-      status: "Đã đặt vé thành công",
-      amount: totalAmount
+    const qrPayload = buildTicketQrPayload({
+      booking,
+      event,
+      seats: selectedSeats.map((seat) => `${seat.seat.row_label}${seat.seat.seat_number}`),
+      user,
+      transaction: paymentTransaction,
     });
-    const qrData = `${window.location.origin}/ticket/verify?data=${btoa(encodeURIComponent(qrJsonData))}`;
+    const verifyUrl = buildTicketVerifyUrl(qrPayload);
+    const qrData = buildTicketQrReceiptText(qrPayload);
 
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-cyan-50 py-12">
@@ -156,15 +189,32 @@ export function CheckoutPage() {
             <CheckCircle2 className="w-16 h-16 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-slate-800 mb-2">
-            Đặt vé thành công!
+            Thanh toán thành công!
           </h1>
 
           <div className="bg-white p-6 rounded-2xl shadow-xl mb-8 flex flex-col items-center">
             <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-4 w-full">
               <QRCodeSVG value={qrData} size={200} level="M" className="mx-auto" />
             </div>
-            <p className="text-sm font-semibold text-slate-700">Mã vé điện tử</p>
-            <p className="text-xs text-slate-500 mt-1">Dùng mã này để check-in tại sự kiện</p>
+            <p className="text-sm font-semibold text-slate-700">Mã xác nhận đơn hàng</p>
+            <p className="text-xs text-slate-500 mt-1 text-center">
+              Quét mã để xem thông tin đơn hàng và giao dịch trên điện thoại.
+            </p>
+            {!paymentTransaction && (
+              <div className="mt-4 rounded-xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+                Chưa tải được chi tiết giao dịch, QR vẫn hiển thị thông tin đơn hàng.
+              </div>
+            )}
+            {verifyUrl && (
+              <a
+                href={verifyUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-flex items-center justify-center rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-2 text-sm font-semibold text-cyan-700 hover:bg-cyan-100 transition-colors"
+              >
+                Mở trang xác minh
+              </a>
+            )}
           </div>
 
           <button

@@ -1,11 +1,30 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { CheckCircle2, XCircle, MapPin, Calendar, Clock, User, Armchair, Ticket } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  MapPin,
+  Calendar,
+  Clock,
+  User,
+  Armchair,
+  Ticket,
+  ReceiptText,
+} from "lucide-react";
+import {
+  decodeTicketQrPayload,
+  formatTicketAmount,
+  formatTicketDateTime,
+  getBookingStatusLabel,
+  getPaymentMethodLabel,
+  getPaymentStatusLabel,
+  type TicketQrPayload,
+} from "../utils/ticket-qr";
 
 export function TicketVerifyPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const [ticketData, setTicketData] = useState<any>(null);
+  const [ticketData, setTicketData] = useState<TicketQrPayload | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -18,14 +37,18 @@ export function TicketVerifyPage() {
         return;
       }
 
-      const decodedString = decodeURIComponent(atob(dataParam));
-      const parsedData = JSON.parse(decodedString);
+      const parsedData = decodeTicketQrPayload(dataParam);
+      if (!parsedData) {
+        setError("Dữ liệu vé không hợp lệ hoặc đã bị hỏng.");
+        return;
+      }
+
       setTicketData(parsedData);
     } catch (err) {
       console.error("Failed to parse ticket data:", err);
       setError("Dữ liệu vé không hợp lệ hoặc đã bị hỏng.");
     }
-  }, [location]);
+  }, [location.search]);
 
   if (error) {
     return (
@@ -53,19 +76,20 @@ export function TicketVerifyPage() {
     );
   }
 
-  const eventDate = ticketData.event?.time ? new Date(ticketData.event.time) : new Date();
+  const eventDate = ticketData.order.event.time ? new Date(ticketData.order.event.time) : null;
+  const hasValidEventDate = eventDate !== null && !Number.isNaN(eventDate.getTime());
+  const transactionCode =
+    ticketData.transaction?.gatewayTransactionId ||
+    ticketData.transaction?.referenceTxnId ||
+    ticketData.transaction?.transactionId;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-900 py-12 px-4 flex items-center justify-center font-sans">
-      <div className="max-w-md w-full relative">
-        {/* Decorative elements */}
+      <div className="max-w-2xl w-full relative">
         <div className="absolute -top-4 -right-4 w-24 h-24 bg-cyan-500/20 rounded-full blur-2xl"></div>
         <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl"></div>
 
-        {/* Main Ticket Card */}
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden relative z-10">
-
-          {/* Header */}
           <div className="bg-gradient-to-r from-cyan-600 to-blue-600 p-8 text-center relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
 
@@ -74,25 +98,27 @@ export function TicketVerifyPage() {
                 <CheckCircle2 className="w-12 h-12 text-white drop-shadow-md" />
               </div>
               <div className="inline-block px-4 py-1.5 bg-green-500 text-white text-sm font-bold tracking-wider rounded-full uppercase shadow-md mb-4">
-                {ticketData.status || "HỢP LỆ"}
+                {getBookingStatusLabel(ticketData.order.bookingStatus)}
               </div>
               <h1 className="text-3xl font-black text-white leading-tight drop-shadow-md">
-                {ticketData.event?.name}
+                {ticketData.order.event.name || "Chưa cập nhật"}
               </h1>
             </div>
           </div>
 
-          {/* Body */}
-          <div className="p-8 pb-4">
-            <div className="grid grid-cols-2 gap-y-6 gap-x-4">
-              <div className="col-span-2">
+          <div className="p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
                 <p className="text-xs uppercase font-bold text-slate-400 mb-1 flex items-center gap-1.5">
                   <User className="w-3.5 h-3.5" /> Khách hàng
                 </p>
-                <p className="text-lg font-bold text-slate-800">{ticketData.user?.name || "Không rõ"}</p>
-                {ticketData.user?.phone && (
-                  <p className="text-sm text-slate-500 font-medium">{ticketData.user.phone}</p>
-                )}
+                <p className="text-lg font-bold text-slate-800">
+                  {ticketData.customer.fullName || "Không rõ"}
+                </p>
+                <div className="flex flex-wrap gap-3 text-sm text-slate-500 font-medium mt-1">
+                  {ticketData.customer.phoneNumber && <span>{ticketData.customer.phoneNumber}</span>}
+                  {ticketData.customer.email && <span>{ticketData.customer.email}</span>}
+                </div>
               </div>
 
               <div>
@@ -100,7 +126,7 @@ export function TicketVerifyPage() {
                   <Calendar className="w-3.5 h-3.5" /> Ngày
                 </p>
                 <p className="text-base font-bold text-slate-800">
-                  {eventDate.toLocaleDateString('vi-VN')}
+                  {hasValidEventDate ? eventDate!.toLocaleDateString("vi-VN") : "Chưa cập nhật"}
                 </p>
               </div>
 
@@ -109,56 +135,134 @@ export function TicketVerifyPage() {
                   <Clock className="w-3.5 h-3.5" /> Giờ
                 </p>
                 <p className="text-base font-bold text-slate-800">
-                  {eventDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                  {hasValidEventDate
+                    ? eventDate.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })
+                    : "Chưa cập nhật"}
                 </p>
               </div>
 
-              <div className="col-span-2">
+              <div className="md:col-span-2">
                 <p className="text-xs uppercase font-bold text-slate-400 mb-1 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5" /> Địa điểm
                 </p>
                 <p className="text-base font-bold text-slate-800 line-clamp-2">
-                  {ticketData.event?.location || "Chưa cập nhật"}
+                  {ticketData.order.event.location || "Chưa cập nhật"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase font-bold text-slate-400 mb-1 flex items-center gap-1.5">
+                  <Armchair className="w-3.5 h-3.5" /> Số ghế
+                </p>
+                <p className="text-xl font-black text-cyan-600 tracking-wider">
+                  {ticketData.order.seats.join(", ") || "Không có"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase font-bold text-slate-400 mb-1 flex items-center gap-1.5">
+                  <Ticket className="w-3.5 h-3.5" /> Tổng tiền
+                </p>
+                <p className="text-xl font-black text-slate-800">
+                  {formatTicketAmount(ticketData.order.totalAmount)}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Divider */}
           <div className="relative h-8 flex items-center justify-between px-2 bg-white">
             <div className="absolute left-0 w-4 h-8 bg-slate-800 rounded-r-full"></div>
             <div className="w-full border-t-2 border-dashed border-slate-300 mx-4"></div>
             <div className="absolute right-0 w-4 h-8 bg-slate-800 rounded-l-full"></div>
           </div>
 
-          {/* Footer - Seats */}
           <div className="p-8 pt-4 bg-slate-50">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 gap-4">
               <div>
-                <p className="text-xs uppercase font-bold text-slate-400 mb-1 flex items-center gap-1.5">
-                  <Armchair className="w-3.5 h-3.5" /> Số ghế
-                </p>
+                <p className="text-xs uppercase font-bold text-slate-400 mb-1">Mã đơn</p>
                 <p className="text-2xl font-black text-cyan-600 tracking-wider">
-                  {ticketData.seats || "Không có"}
+                  {ticketData.order.bookingId.substring(0, 8).toUpperCase()}
                 </p>
               </div>
               <div className="text-right">
-                <Ticket className="w-10 h-10 text-slate-300 ml-auto" />
+                <p className="text-xs uppercase font-bold text-slate-400 mb-1">Cập nhật</p>
+                <p className="text-sm font-semibold text-slate-700">
+                  {formatTicketDateTime(ticketData.transaction?.updatedAt || ticketData.generatedAt)}
+                </p>
               </div>
             </div>
 
-            <div className="text-center">
-              <div className="inline-block bg-slate-200 px-4 py-2 rounded-lg">
-                <p className="text-xs text-slate-500 font-mono tracking-[0.2em]">
-                  {ticketData.bookingId?.substring(0, 12).toUpperCase() || "TICKET-RUSH-SYSTEM"}
-                </p>
+            <div className="rounded-2xl border border-cyan-100 bg-white p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <ReceiptText className="w-5 h-5 text-cyan-600" />
+                  <h2 className="text-lg font-bold text-slate-800">Thông tin giao dịch</h2>
+                </div>
+                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-50 text-cyan-700">
+                  {getPaymentStatusLabel(ticketData.transaction?.status)}
+                </span>
               </div>
-              <p className="text-[10px] text-slate-400 mt-4 uppercase tracking-widest">
+
+              {ticketData.transaction ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs uppercase font-bold text-slate-400 mb-1">Phương thức</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {getPaymentMethodLabel(ticketData.transaction.paymentMethod)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase font-bold text-slate-400 mb-1">Số tiền</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {formatTicketAmount(ticketData.transaction.amount)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase font-bold text-slate-400 mb-1">Mã giao dịch</p>
+                    <p className="text-sm font-semibold text-slate-800 break-words">
+                      {transactionCode || "Chưa cập nhật"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase font-bold text-slate-400 mb-1">Mã tham chiếu</p>
+                    <p className="text-sm font-semibold text-slate-800 break-words">
+                      {ticketData.transaction.referenceTxnId || "Chưa cập nhật"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase font-bold text-slate-400 mb-1">Trạng thái</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {getPaymentStatusLabel(ticketData.transaction.status)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase font-bold text-slate-400 mb-1">Cập nhật</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      {formatTicketDateTime(ticketData.transaction.updatedAt || ticketData.transaction.createdAt)}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-xl bg-yellow-50 border border-yellow-200 p-4 text-sm text-yellow-800">
+                  Không có dữ liệu giao dịch trong mã này.
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 text-center">
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest">
                 Phát hành bởi TicketRush
               </p>
             </div>
           </div>
         </div>
+
+        <button
+          onClick={() => navigate("/my-tickets")}
+          className="mt-6 w-full py-3 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors border border-white/10"
+        >
+          Quay lại vé của tôi
+        </button>
       </div>
     </div>
   );
