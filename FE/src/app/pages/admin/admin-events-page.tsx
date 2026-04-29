@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
 import {
   Plus,
@@ -15,6 +15,8 @@ import {
   Armchair,
   CheckCircle2,
   Clock,
+  ImagePlus,
+  UploadCloud,
 } from "lucide-react";
 import { eventService } from "../../services/event-service";
 import { Event, Seat, Zone } from "../../types";
@@ -125,6 +127,12 @@ export function AdminEventsPage() {
   const [liveUpdatedAt, setLiveUpdatedAt] = useState<Date | null>(null);
   const [liveRefreshTick, setLiveRefreshTick] = useState(0);
   const [timeError, setTimeError] = useState<string | null>(null);
+  // --- Image upload state ---
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -194,6 +202,25 @@ export function AdminEventsPage() {
     };
   }, [selectedLiveEventId, liveRefreshTick]);
 
+  const handleImageFileChange = (file: File) => {
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+    setImageUrl("");
+  };
+
+  const handleImageUrlChange = (url: string) => {
+    setImageUrl(url);
+    setImagePreview(url || null);
+    setImageFile(null);
+  };
+
+  const handleClearImage = () => {
+    setImagePreview(null);
+    setImageFile(null);
+    setImageUrl("");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSubmitEvent = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -213,13 +240,29 @@ export function AdminEventsPage() {
       return val.length === 16 ? `${val}:00` : val;
     };
 
+    // Resolve final image URL: upload file if present, else use typed URL
+    let finalImageUrl: string | null = imageUrl || null;
+    if (imageFile) {
+      try {
+        setIsUploadingImage(true);
+        finalImageUrl = await eventService.uploadImage(imageFile);
+      } catch (err) {
+        console.error("Upload ảnh thất bại:", err);
+        alert("Upload ảnh thất bại! Vui lòng thử lại.");
+        setIsUploadingImage(false);
+        return;
+      } finally {
+        setIsUploadingImage(false);
+      }
+    }
+
     const eventData: any = {
       name: formData.get("name"),
       description: formData.get("description"),
       location: formData.get("location"),
       startTime: formatDateTime(formData.get("start_time")),
       endTime: formatDateTime(formData.get("end_time")),
-      imageUrl: formData.get("image"),
+      imageUrl: finalImageUrl,
       status: formData.get("status") || "DRAFT",
     };
 
@@ -236,12 +279,14 @@ export function AdminEventsPage() {
         alert("Tạo mới thành công!");
         setShowCreateModal(false);
         setEditingEvent(null);
+        handleClearImage();
         navigate(`/admin/events/${savedEvent.id}/seats`);
         return;
       }
 
       setShowCreateModal(false);
       setEditingEvent(null);
+      handleClearImage();
     } catch (error) {
       console.error("Lỗi khi lưu sự kiện:", error);
       alert("Có lỗi xảy ra khi lưu!");
@@ -585,32 +630,99 @@ export function AdminEventsPage() {
                 </select>
               </div>
 
+              {/* ===== IMAGE UPLOAD WIDGET ===== */}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Ảnh sự kiện (URL)
+                  Ảnh sự kiện
                 </label>
+
+                {/* Preview area / Drop zone */}
+                <div
+                  className="relative w-full rounded-xl border-2 border-dashed border-slate-300 overflow-hidden bg-slate-50 hover:border-cyan-400 transition-colors cursor-pointer"
+                  style={{ minHeight: "160px" }}
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(ev) => { ev.preventDefault(); ev.currentTarget.classList.add("border-cyan-500"); }}
+                  onDragLeave={(ev) => { ev.currentTarget.classList.remove("border-cyan-500"); }}
+                  onDrop={(ev) => {
+                    ev.preventDefault();
+                    ev.currentTarget.classList.remove("border-cyan-500");
+                    const dropped = ev.dataTransfer.files[0];
+                    if (dropped && dropped.type.startsWith("image/")) handleImageFileChange(dropped);
+                  }}
+                >
+                  {imagePreview ? (
+                    <>
+                      <img
+                        src={imagePreview}
+                        alt="preview"
+                        className="w-full object-cover"
+                        style={{ maxHeight: "220px" }}
+                        onError={() => setImagePreview(null)}
+                      />
+                      {/* Delete button */}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handleClearImage(); }}
+                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
+                        title="Xóa ảnh"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                      {imageFile && (
+                        <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/50 text-white text-xs">
+                          {imageFile.name}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-2 h-40 text-slate-400 select-none">
+                      <UploadCloud className="w-10 h-10" />
+                      <p className="text-sm font-medium">Kéo thả ảnh hoặc bấm để chọn file</p>
+                      <p className="text-xs">PNG, JPG, WEBP — tối đa 10 MB</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Hidden file input */}
                 <input
-                  type="url"
-                  name="image"
-                  defaultValue={editingEvent?.imageUrl || editingEvent?.image}
-                  placeholder="https://example.com/image.jpg"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handleImageFileChange(f);
+                  }}
                 />
+
+                {/* OR: URL input */}
+                <div className="mt-3 flex items-center gap-2">
+                  <ImagePlus className="w-4 h-4 text-slate-400 shrink-0" />
+                  <input
+                    type="url"
+                    placeholder="Hoặc dán URL ảnh vào đây..."
+                    value={imageUrl}
+                    onChange={(e) => handleImageUrlChange(e.target.value)}
+                    className="flex-1 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setShowCreateModal(false)}
+                  onClick={() => { setShowCreateModal(false); handleClearImage(); }}
                   className="flex-1 px-6 py-3 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all"
+                  disabled={isUploadingImage}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-xl hover:from-cyan-700 hover:to-blue-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {editingEvent ? "Lưu thay đổi" : "Tạo sự kiện"}
+                  {isUploadingImage && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isUploadingImage ? "Đang upload ảnh..." : editingEvent ? "Lưu thay đổi" : "Tạo sự kiện"}
                 </button>
               </div>
             </form>

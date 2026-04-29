@@ -30,4 +30,17 @@ export const eventService = {
   deleteEvent: async (id: string | number): Promise<void> => {
     await apiClient.delete(`/api/admin/events/${id}`);
   },
+
+  /**
+   * Upload a local image file to the server.
+   * Returns the public URL of the uploaded image (e.g. "/uploads/uuid.jpg").
+   */
+  uploadImage: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await apiClient.post<{ url: string }>("/api/upload/image", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response.data.url;
+  },
 };

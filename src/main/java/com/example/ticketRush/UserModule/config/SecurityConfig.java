@@ -78,7 +78,8 @@ public class SecurityConfig {
                         // Public – Static resources
                         .requestMatchers(
                                 "/css/**", "/js/**", "/images/**",
-                                "/favicon.ico", "/error"
+                                "/favicon.ico", "/error",
+                                "/uploads/**"
                         ).permitAll()
                         // Public – Swagger / OpenAPI
                         .requestMatchers(
