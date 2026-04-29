@@ -11,6 +11,7 @@ import com.example.ticketRush.EventModule.Entity.Zone;
 import com.example.ticketRush.EventModule.Enum.SeatStatus;
 import com.example.ticketRush.EventModule.Exception.EventNotFoundException;
 import com.example.ticketRush.EventModule.Exception.SeatLayoutConflictException;
+import com.example.ticketRush.Common.ServiceImpl.FileUploadService;
 import com.example.ticketRush.EventModule.Mapper.EventMapper;
 import com.example.ticketRush.EventModule.Repository.EventRepository;
 import com.example.ticketRush.EventModule.Service.EventService;
@@ -27,6 +28,7 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final BookingRepository bookingRepository;
+    private final FileUploadService fileUploadService;
 
     @Override
     @Transactional(readOnly = true)
@@ -112,7 +114,21 @@ public class EventServiceImpl implements EventService {
     @Override
     public void deleteEvent(Long eventId) {
         Event event = getEventEntity(eventId);
+
+        // Kiểm tra xem có đơn hàng nào không trước khi xóa
+        if (bookingRepository.countByEventIdAndStatusIn(eventId, List.of(BookingStatus.PENDING, BookingStatus.PAID)) > 0) {
+            throw new SeatLayoutConflictException("Không thể xóa sự kiện đã có đơn hàng (PENDING/PAID)");
+        }
+
+        // Lưu lại imageUrl để xóa file sau
+        String imageUrl = event.getImageUrl();
+
         eventRepository.delete(event);
+
+        // Xóa file ảnh khỏi storage nếu là local upload
+        if (imageUrl != null && imageUrl.contains("/uploads/")) {
+            fileUploadService.deleteFile(imageUrl);
+        }
     }
 
     private Event getEventEntity(Long eventId) {

@@ -23,6 +23,7 @@ import { Event, Seat, Zone } from "../../types";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { useAuth } from "../../hooks/use-auth";
+import { toast } from "sonner";
 
 type SeatSummary = {
   total: number;
@@ -202,6 +203,17 @@ export function AdminEventsPage() {
     };
   }, [selectedLiveEventId, liveRefreshTick]);
 
+  useEffect(() => {
+    if (editingEvent) {
+      const img = editingEvent.imageUrl || editingEvent.image || "";
+      setImageUrl(img);
+      setImagePreview(img || null);
+      setImageFile(null);
+    } else {
+      handleClearImage();
+    }
+  }, [editingEvent]);
+
   const handleImageFileChange = (file: File) => {
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
@@ -248,7 +260,7 @@ export function AdminEventsPage() {
         finalImageUrl = await eventService.uploadImage(imageFile);
       } catch (err) {
         console.error("Upload ảnh thất bại:", err);
-        alert("Upload ảnh thất bại! Vui lòng thử lại.");
+        toast.error("Upload ảnh thất bại! Vui lòng thử lại.");
         setIsUploadingImage(false);
         return;
       } finally {
@@ -272,11 +284,11 @@ export function AdminEventsPage() {
       if (editingEvent) {
         savedEvent = await eventService.updateEvent(editingEvent.id, eventData);
         setEvents((prev) => prev.map((event) => (event.id === savedEvent.id ? savedEvent : event)));
-        alert("Cập nhật thành công!");
+        toast.success("Cập nhật thành công!");
       } else {
         savedEvent = await eventService.createEvent(eventData);
         setEvents((prev) => [savedEvent, ...prev]);
-        alert("Tạo mới thành công!");
+        toast.success("Tạo mới thành công!");
         setShowCreateModal(false);
         setEditingEvent(null);
         handleClearImage();
@@ -289,19 +301,20 @@ export function AdminEventsPage() {
       handleClearImage();
     } catch (error) {
       console.error("Lỗi khi lưu sự kiện:", error);
-      alert("Có lỗi xảy ra khi lưu!");
+      toast.error("Có lỗi xảy ra khi lưu!");
     }
   };
 
-  const handleDeleteEvent = async (id: number) => {
+  const handleDeleteEvent = async (e: React.MouseEvent, id: number) => {
+    e.stopPropagation();
     if (!window.confirm("Bạn có chắc chắn muốn xóa sự kiện này?")) return;
     try {
       await eventService.deleteEvent(id);
       setEvents(events.filter((e) => e.id !== id));
-      alert("Đã xóa sự kiện!");
+      toast.success("Đã xóa sự kiện!");
     } catch (err) {
       console.error("Lỗi khi xóa sự kiện:", err);
-      alert("Xóa thất bại!");
+      toast.error("Xóa thất bại! (Sự kiện có thể đã có đơn hàng)");
     }
   };
 
@@ -484,7 +497,8 @@ export function AdminEventsPage() {
                     {isAdmin && (
                       <>
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setEditingEvent(event);
                             setTimeError(null);
                             setShowCreateModal(true);
@@ -495,7 +509,7 @@ export function AdminEventsPage() {
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteEvent(event.id)}
+                          onClick={(e) => handleDeleteEvent(e, event.id)}
                           className="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors"
                           title="Xóa sự kiện"
                         >

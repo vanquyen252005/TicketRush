@@ -20,4 +20,14 @@ public class FileUploadService {
         String fileName = storageService.storeFromUrl(imageUrl);
         return fileName;
     }
+
+    public void deleteFile(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) return;
+        // Trích xuất filename từ URL (VD: http://.../uploads/abc.jpg -> abc.jpg)
+        String filename = imageUrl;
+        if (imageUrl.contains("/uploads/")) {
+            filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+        }
+        storageService.delete(filename);
+    }
 }
