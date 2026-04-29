@@ -2,8 +2,10 @@ import apiClient from "../api-client";
 import { AdminBooking } from "../types";
 
 export const adminBookingService = {
-  getBookings: async (): Promise<AdminBooking[]> => {
-    const response = await apiClient.get<AdminBooking[]>("/api/admin/bookings");
+  getBookings: async (userId?: string): Promise<AdminBooking[]> => {
+    const response = await apiClient.get<AdminBooking[]>("/api/admin/bookings", {
+      params: userId ? { userId } : undefined,
+    });
     return response.data;
   },
 

@@ -8,5 +8,7 @@ import java.util.UUID;
 public interface AdminBookingService {
     List<AdminBookingResponse> getBookings();
 
+    List<AdminBookingResponse> getBookings(java.util.UUID userId);
+
     AdminBookingResponse getBooking(UUID bookingId);
 }

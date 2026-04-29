@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,14 @@ public class AdminTransactionServiceImpl implements AdminTransactionService {
     @Override
     public List<AdminPaymentTransactionResponse> getTransactions() {
         return paymentTransactionRepository.findAllDetailedOrderByCreatedAtDesc()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<AdminPaymentTransactionResponse> getTransactions(UUID userId) {
+        return paymentTransactionRepository.findDetailedByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(this::toResponse)
                 .toList();

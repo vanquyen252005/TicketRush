@@ -4,6 +4,7 @@ import com.example.ticketRush.BookingModule.Exception.BookingAccessDeniedExcepti
 import com.example.ticketRush.BookingModule.Exception.BookingExpiredException;
 import com.example.ticketRush.BookingModule.Exception.BookingNotFoundException;
 import com.example.ticketRush.BookingModule.Exception.SeatUnavailableException;
+import com.example.ticketRush.AdminModule.Exception.AdminUserNotFoundException;
 import com.example.ticketRush.EventModule.Exception.EventNotFoundException;
 import com.example.ticketRush.EventModule.Exception.SeatLayoutConflictException;
 import jakarta.validation.ConstraintViolationException;
@@ -48,6 +49,11 @@ public class ApiExceptionHandler {
     @ExceptionHandler(SeatLayoutConflictException.class)
     public ResponseEntity<Map<String, Object>> handleSeatLayoutConflict(SeatLayoutConflictException exception) {
         return buildResponse(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(AdminUserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleAdminUserNotFound(AdminUserNotFoundException exception) {
+        return buildResponse(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

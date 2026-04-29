@@ -1,6 +1,6 @@
 export type AuthProvider = 'LOCAL' | 'GOOGLE';
 export type UserRole = 'CUSTOMER' | 'ADMIN' | 'ORGANIZER';
-export type UserStatus = 'ACTIVE' | 'BANNED';
+export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'DELETED';
 
 export type EventStatus = 'DRAFT' | 'COMING_SOON' | 'SELLING' | 'PUBLISHED' | 'SOLD_OUT' | 'COMPLETED' | 'CANCELLED';
 export type SeatStatus = 'AVAILABLE' | 'LOCKED' | 'BOOKED';
@@ -151,6 +151,30 @@ export interface AdminPaymentTransaction {
   error_message?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface AdminUserSummary {
+  id: string;
+  email: string;
+  full_name: string;
+  phone_number?: string;
+  gender?: string;
+  date_of_birth?: string;
+  role: string;
+  status: string;
+  created_at?: string;
+  updated_at?: string;
+  booking_count: number;
+  ticket_count: number;
+  transaction_count: number;
+  total_spent: number;
+  last_activity_at?: string;
+}
+
+export interface AdminUserDetail {
+  user: AdminUserSummary;
+  bookings: AdminBooking[];
+  transactions: AdminPaymentTransaction[];
 }
 
 export interface DashboardStats {

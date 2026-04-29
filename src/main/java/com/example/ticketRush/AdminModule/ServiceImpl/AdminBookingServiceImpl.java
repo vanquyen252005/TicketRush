@@ -32,6 +32,14 @@ public class AdminBookingServiceImpl implements AdminBookingService {
     }
 
     @Override
+    public List<AdminBookingResponse> getBookings(UUID userId) {
+        return bookingRepository.findDetailedByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
     public AdminBookingResponse getBooking(UUID bookingId) {
         Booking booking = bookingRepository.findDetailedById(bookingId)
                 .orElseThrow(() -> new BookingNotFoundException(bookingId));

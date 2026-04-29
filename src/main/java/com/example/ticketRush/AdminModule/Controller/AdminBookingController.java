@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -19,8 +20,8 @@ public class AdminBookingController {
     private final AdminBookingService adminBookingService;
 
     @GetMapping
-    public List<AdminBookingResponse> getBookings() {
-        return adminBookingService.getBookings();
+    public List<AdminBookingResponse> getBookings(@RequestParam(required = false) UUID userId) {
+        return userId == null ? adminBookingService.getBookings() : adminBookingService.getBookings(userId);
     }
 
     @GetMapping("/{bookingId}")
