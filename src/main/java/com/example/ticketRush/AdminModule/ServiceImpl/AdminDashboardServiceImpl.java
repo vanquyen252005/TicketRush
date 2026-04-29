@@ -15,16 +15,21 @@ import com.example.ticketRush.PaymentModule.Enum.PaymentStatus;
 import com.example.ticketRush.PaymentModule.Repository.PaymentTransactionRepository;
 import com.example.ticketRush.PaymentModule.Service.PaymentTransactionService;
 import com.example.ticketRush.UserModule.Entity.User;
-import com.example.ticketRush.UserModule.Enum.Role;
 import com.example.ticketRush.UserModule.Repository.UserRepository;
+import com.example.ticketRush.UserModule.Service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.YearMonth;
 import java.time.Period;
 import java.util.Collection;
@@ -43,18 +48,27 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
     private static final List<String> AGE_BUCKETS = List.of("Dưới 18", "18-24", "25-34", "35-44", "45+", "Không rõ");
     private static final List<String> GENDER_BUCKETS = List.of("Nam", "Nữ", "Khác", "Không rõ");
+    private static final String UNKNOWN_LABEL = "Không rõ";
+    private static final Logger log = LoggerFactory.getLogger(AdminDashboardServiceImpl.class);
 
     private final EventRepository eventRepository;
     private final BookingRepository bookingRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
     private final PaymentTransactionService paymentTransactionService;
+    private final UserService userService;
     private final UserRepository userRepository;
+
+    private record AudienceProfile(String gender, LocalDate dateOfBirth) {
+    }
+
+    private record KeycloakProfile(String email, String username, String gender, LocalDate dateOfBirth) {
+    }
 
     @Override
     public AdminDashboardResponse getDashboard() {
         List<Event> events = eventRepository.findAllDetailed();
         List<Booking> paidBookings = bookingRepository.findAllPaidDetailed();
-        List<User> audienceUsers = loadAudienceUsers(paidBookings);
+        List<AudienceProfile> audienceProfiles = loadAudienceProfiles(paidBookings);
 
         BigDecimal totalRevenue = paidBookings.stream()
                 .map(Booking::getTotalAmount)
@@ -141,8 +155,8 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 .sorted(Comparator.comparing(AdminDashboardResponse.EventPerformance::revenue).reversed())
                 .toList();
 
-        List<AdminDashboardResponse.AudienceSegment> ageData = buildAgeSegments(audienceUsers);
-        List<AdminDashboardResponse.AudienceSegment> genderData = buildGenderSegments(audienceUsers);
+        List<AdminDashboardResponse.AudienceSegment> ageData = buildAgeSegments(audienceProfiles);
+        List<AdminDashboardResponse.AudienceSegment> genderData = buildGenderSegments(audienceProfiles);
 
         BigDecimal averageFillRate = totalCapacity > 0
                 ? BigDecimal.valueOf(totalSoldAcrossEvents)
@@ -200,20 +214,21 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         );
     }
 
-    private List<User> loadAudienceUsers(Collection<Booking> paidBookings) {
-        List<User> registeredUsers = userRepository.findAll().stream()
-                .filter(user -> user.getRole() == Role.ROLE_USER)
-                .toList();
+    private List<AudienceProfile> loadAudienceProfiles(Collection<Booking> paidBookings) {
+        Map<String, KeycloakProfile> keycloakProfiles = loadKeycloakProfiles();
+        Map<UUID, AudienceProfile> uniqueAudience = new LinkedHashMap<>();
 
-        if (!registeredUsers.isEmpty()) {
-            return registeredUsers;
-        }
-
-        Map<UUID, User> uniqueAudience = new LinkedHashMap<>();
         paidBookings.stream()
                 .map(Booking::getUser)
                 .filter(Objects::nonNull)
-                .forEach(user -> uniqueAudience.putIfAbsent(user.getId(), user));
+                .forEach(user -> {
+                    if (user.getId() == null || uniqueAudience.containsKey(user.getId())) {
+                        return;
+                    }
+
+                    AudienceProfile profile = resolveAudienceProfile(user, keycloakProfiles);
+                    uniqueAudience.put(user.getId(), profile);
+                });
 
         return List.copyOf(uniqueAudience.values());
     }
@@ -251,13 +266,13 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         return zone.getSeats() == null ? 0L : zone.getSeats().size();
     }
 
-    private List<AdminDashboardResponse.AudienceSegment> buildAgeSegments(Collection<User> users) {
+    private List<AdminDashboardResponse.AudienceSegment> buildAgeSegments(Collection<AudienceProfile> profiles) {
         Map<String, Long> counts = new LinkedHashMap<>();
         AGE_BUCKETS.forEach(bucket -> counts.put(bucket, 0L));
 
-        users.forEach(user -> counts.compute(resolveAgeBucket(user.getDateOfBirth()), (key, value) -> value == null ? 1L : value + 1L));
+        profiles.forEach(profile -> counts.compute(resolveAgeBucket(profile.dateOfBirth()), (key, value) -> value == null ? 1L : value + 1L));
 
-        long total = Math.max(users.size(), 1);
+        long total = Math.max(profiles.size(), 1);
         return counts.entrySet().stream()
                 .map(entry -> new AdminDashboardResponse.AudienceSegment(
                         entry.getKey(),
@@ -267,13 +282,13 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 .toList();
     }
 
-    private List<AdminDashboardResponse.AudienceSegment> buildGenderSegments(Collection<User> users) {
+    private List<AdminDashboardResponse.AudienceSegment> buildGenderSegments(Collection<AudienceProfile> profiles) {
         Map<String, Long> counts = new LinkedHashMap<>();
         GENDER_BUCKETS.forEach(bucket -> counts.put(bucket, 0L));
 
-        users.forEach(user -> counts.compute(resolveGender(user.getGender()), (key, value) -> value == null ? 1L : value + 1L));
+        profiles.forEach(profile -> counts.compute(resolveGender(profile.gender()), (key, value) -> value == null ? 1L : value + 1L));
 
-        long total = Math.max(users.size(), 1);
+        long total = Math.max(profiles.size(), 1);
         return counts.entrySet().stream()
                 .map(entry -> new AdminDashboardResponse.AudienceSegment(
                         entry.getKey(),
@@ -284,11 +299,14 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     }
 
     private String resolveAgeBucket(LocalDate dateOfBirth) {
-        if (dateOfBirth == null) {
-            return "Không rõ";
+        if (dateOfBirth == null || dateOfBirth.isAfter(LocalDate.now())) {
+            return UNKNOWN_LABEL;
         }
 
         int age = Period.between(dateOfBirth, LocalDate.now()).getYears();
+        if (age < 0 || age > 120) {
+            return UNKNOWN_LABEL;
+        }
         if (age < 18) {
             return "Dưới 18";
         }
@@ -305,24 +323,201 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     }
 
     private String resolveGender(String gender) {
-        if (gender == null || gender.isBlank()) {
-            return "Không rõ";
+        if (!hasMeaningfulText(gender)) {
+            return UNKNOWN_LABEL;
         }
 
-        String normalized = gender.trim().toLowerCase(Locale.ROOT);
+        String normalized = normalizeProfileValue(gender);
         if (normalized.equals("nam") || normalized.equals("male") || normalized.equals("m")) {
             return "Nam";
         }
 
-        if (normalized.equals("nữ") || normalized.equals("nu") || normalized.equals("female") || normalized.equals("f")) {
+        if (normalized.equals("nu") || normalized.equals("female") || normalized.equals("f")) {
             return "Nữ";
         }
 
-        if (normalized.equals("khác") || normalized.equals("khac") || normalized.equals("other")) {
+        if (normalized.equals("khac") || normalized.equals("other")) {
             return "Khác";
         }
 
-        return "Khác";
+        return UNKNOWN_LABEL;
+    }
+
+    private Map<String, KeycloakProfile> loadKeycloakProfiles() {
+        try {
+            Map<String, KeycloakProfile> profiles = new LinkedHashMap<>();
+
+            for (Map<String, Object> user : userService.getAllKeycloakUsers()) {
+                KeycloakProfile profile = toKeycloakProfile(user);
+                if (profile == null) {
+                    continue;
+                }
+
+                if (hasMeaningfulText(profile.email())) {
+                    profiles.putIfAbsent(normalizeLookupKey(profile.email()), profile);
+                }
+
+                if (hasMeaningfulText(profile.username())) {
+                    profiles.putIfAbsent(normalizeLookupKey(profile.username()), profile);
+                }
+            }
+
+            return profiles;
+        } catch (Exception e) {
+            return Map.of();
+        }
+    }
+
+    private KeycloakProfile toKeycloakProfile(Map<String, Object> user) {
+        if (user == null || user.isEmpty()) {
+            return null;
+        }
+
+        return new KeycloakProfile(
+                asString(user.get("email")),
+                asString(user.get("username")),
+                normalizeProfileValue(asString(user.get("gender"))),
+                parseDateOfBirth(asString(user.get("date_of_birth")))
+        );
+    }
+
+    private AudienceProfile resolveAudienceProfile(User user, Map<String, KeycloakProfile> keycloakProfiles) {
+        KeycloakProfile keycloakProfile = findKeycloakProfile(user, keycloakProfiles);
+
+        String gender = normalizeGenderForStorage(firstMeaningfulText(
+                keycloakProfile != null ? keycloakProfile.gender() : null,
+                user.getGender()));
+        LocalDate dateOfBirth = keycloakProfile != null && keycloakProfile.dateOfBirth() != null
+                ? keycloakProfile.dateOfBirth()
+                : user.getDateOfBirth();
+
+        syncLocalAudienceProfile(user, gender, dateOfBirth);
+
+        return new AudienceProfile(gender, dateOfBirth);
+    }
+
+    private KeycloakProfile findKeycloakProfile(User user, Map<String, KeycloakProfile> keycloakProfiles) {
+        if (user == null || keycloakProfiles.isEmpty()) {
+            return null;
+        }
+
+        KeycloakProfile byEmail = lookupProfile(keycloakProfiles, user.getEmail());
+        if (byEmail != null) {
+            return byEmail;
+        }
+
+        return lookupProfile(keycloakProfiles, user.getUsername());
+    }
+
+    private KeycloakProfile lookupProfile(Map<String, KeycloakProfile> profiles, String key) {
+        if (!hasMeaningfulText(key)) {
+            return null;
+        }
+
+        return profiles.get(normalizeLookupKey(key));
+    }
+
+    private LocalDate parseDateOfBirth(String value) {
+        if (!hasMeaningfulText(value)) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        List<DateTimeFormatter> formatters = List.of(
+                DateTimeFormatter.ISO_LOCAL_DATE,
+                DateTimeFormatter.ofPattern("M/d/uuuu"),
+                DateTimeFormatter.ofPattern("d/M/uuuu"),
+                DateTimeFormatter.ofPattern("uuuu/M/d")
+        );
+
+        for (DateTimeFormatter formatter : formatters) {
+            try {
+                return LocalDate.parse(trimmed, formatter);
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+
+        return null;
+    }
+
+    private String firstMeaningfulText(String... values) {
+        for (String value : values) {
+            if (hasMeaningfulText(value)) {
+                return value.trim();
+            }
+        }
+
+        return null;
+    }
+
+    private boolean hasMeaningfulText(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+
+        String normalized = normalizeProfileValue(value);
+        return !normalized.equals("n/a")
+                && !normalized.equals("na")
+                && !normalized.equals("null")
+                && !normalized.equals("unknown")
+                && !normalized.equals("none")
+                && !normalized.equals("-")
+                && !normalized.equals("chua cap nhat");
+    }
+
+    private String normalizeLookupKey(String value) {
+        return value == null ? null : value.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeProfileValue(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        String normalized = Normalizer.normalize(value, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{M}", "").trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeGenderForStorage(String gender) {
+        if (!hasMeaningfulText(gender)) {
+            return null;
+        }
+
+        String normalized = normalizeProfileValue(gender);
+        return switch (normalized) {
+            case "nam", "male", "m" -> "MALE";
+            case "nu", "female", "f" -> "FEMALE";
+            case "khac", "other" -> "OTHER";
+            default -> gender.trim();
+        };
+    }
+
+    private void syncLocalAudienceProfile(User user, String gender, LocalDate dateOfBirth) {
+        if (user == null || user.getId() == null) {
+            return;
+        }
+
+        boolean changed = false;
+        if (gender != null && !gender.equals(user.getGender())) {
+            user.setGender(gender);
+            changed = true;
+        }
+        if (dateOfBirth != null && !dateOfBirth.equals(user.getDateOfBirth())) {
+            user.setDateOfBirth(dateOfBirth);
+            changed = true;
+        }
+
+        if (changed) {
+            try {
+                userRepository.save(user);
+            } catch (Exception e) {
+                log.warn("Không thể đồng bộ gender/dateOfBirth cho user {}: {}", user.getId(), e.getMessage());
+            }
+        }
+    }
+
+    private String asString(Object value) {
+        return value == null ? null : String.valueOf(value);
     }
 
     private BigDecimal percentage(long value, long total) {

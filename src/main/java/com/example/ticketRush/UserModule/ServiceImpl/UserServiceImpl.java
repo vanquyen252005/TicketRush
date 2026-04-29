@@ -6,13 +6,29 @@ import com.example.ticketRush.UserModule.Enum.UserStatus;
 import com.example.ticketRush.UserModule.Repository.UserRepository;
 import com.example.ticketRush.UserModule.Service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Optional;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+    private static final List<DateTimeFormatter> DATE_FORMATTERS = List.of(
+            DateTimeFormatter.ISO_LOCAL_DATE,
+            DateTimeFormatter.ofPattern("M/d/uuuu"),
+            DateTimeFormatter.ofPattern("d/M/uuuu"),
+            DateTimeFormatter.ofPattern("uuuu/M/d")
+    );
+
     private final UserRepository userRepository;
     private final org.keycloak.admin.client.Keycloak keycloak;
 
@@ -22,40 +38,29 @@ public class UserServiceImpl implements UserService {
     @Override
     public void findOrCreateUserFromKeycloak(String keycloakSubjectId, String username, String email, String fullName,
             Role role) {
-        // Hiện DB chưa có cột keycloakSubjectId, nên mình dùng email/username để
-        // "upsert" tối thiểu.
-        userRepository.findByEmailIgnoreCase(email).ifPresentOrElse(existing -> {
-            boolean changed = false;
-            if (existing.getUsername() == null && username != null && !username.isBlank()) {
-                existing.setUsername(username);
-                changed = true;
+        String gender = null;
+        String dateOfBirth = null;
+
+        if (hasMeaningfulText(keycloakSubjectId)) {
+            try {
+                org.keycloak.representations.idm.UserRepresentation keycloakUser = keycloak.realm(realm).users()
+                        .get(keycloakSubjectId)
+                        .toRepresentation();
+                gender = extractMeaningfulAttribute(keycloakUser, "gender");
+                dateOfBirth = extractMeaningfulAttribute(keycloakUser,
+                        "dateOfBirth",
+                        "date_of_birth",
+                        "date-of-birth",
+                        "date_of_bird",
+                        "dob");
+            } catch (jakarta.ws.rs.NotFoundException e) {
+                log.warn("Không tìm thấy user Keycloak với subjectId {} khi đồng bộ hồ sơ local", keycloakSubjectId);
+            } catch (Exception e) {
+                log.warn("Không thể đọc hồ sơ Keycloak cho subjectId {}: {}", keycloakSubjectId, e.getMessage());
             }
-            if (fullName != null && !fullName.isBlank() && !fullName.equals(existing.getFullName())) {
-                existing.setFullName(fullName);
-                changed = true;
-            }
-            if (role != null && role != existing.getRole()) {
-                existing.setRole(role);
-                changed = true;
-            }
-            if (existing.getStatus() == null) {
-                existing.setStatus(UserStatus.ACTIVE);
-                changed = true;
-            }
-            if (changed) {
-                userRepository.save(existing);
-            }
-        }, () -> {
-            User user = User.builder()
-                    .email(email)
-                    .username(username)
-                    .password(null) // user OAuth2 không dùng password nội bộ
-                    .fullName((fullName == null || fullName.isBlank()) ? email : fullName)
-                    .role(role == null ? Role.ROLE_USER : role)
-                    .status(UserStatus.ACTIVE)
-                    .build();
-            userRepository.save(user);
-        });
+        }
+
+        upsertLocalUserProfile(username, email, fullName, role, gender, parseDateOfBirth(dateOfBirth));
     }
 
     @Override
@@ -85,6 +90,7 @@ public class UserServiceImpl implements UserService {
                         + (user.getLastName() != null ? user.getLastName() : "");
                 userMap.put("full_name", fullName.trim().isEmpty() ? user.getUsername() : fullName.trim());
                 userMap.put("email", user.getEmail());
+                userMap.put("username", user.getUsername());
 
                 java.util.List<String> roleNames = roles.stream()
                         .map(org.keycloak.representations.idm.RoleRepresentation::getName)
@@ -182,13 +188,23 @@ public class UserServiceImpl implements UserService {
             user.setEmailVerified(true);
 
             java.util.Map<String, java.util.List<String>> attributes = new java.util.HashMap<>();
-            if (phoneNumber != null && !phoneNumber.isBlank()) attributes.put("PhoneNumber", java.util.List.of(phoneNumber));
-            if (gender != null && !gender.isBlank()) attributes.put("gender", java.util.List.of(gender));
-            if (dob != null && !dob.isBlank()) {
-                attributes.put("dateOfBirth", java.util.List.of(dob));
-                attributes.put("date_of_birth", java.util.List.of(dob));
-                attributes.put("date-of-birth", java.util.List.of(dob));
-                attributes.put("date_of_bird", java.util.List.of(dob));
+            if (phoneNumber != null && !phoneNumber.isBlank()) {
+                attributes.put("PhoneNumber", java.util.List.of(phoneNumber));
+            }
+
+            String normalizedGender = normalizeGenderForStorage(gender);
+            if (normalizedGender != null) {
+                attributes.put("gender", java.util.List.of(normalizedGender));
+            }
+
+            LocalDate parsedDob = parseDateOfBirth(dob);
+            if (parsedDob != null) {
+                String normalizedDob = parsedDob.format(DateTimeFormatter.ISO_LOCAL_DATE);
+                attributes.put("dateOfBirth", java.util.List.of(normalizedDob));
+                attributes.put("date_of_birth", java.util.List.of(normalizedDob));
+                attributes.put("date-of-birth", java.util.List.of(normalizedDob));
+                attributes.put("date_of_bird", java.util.List.of(normalizedDob));
+                attributes.put("dob", java.util.List.of(normalizedDob));
             }
             if (!attributes.isEmpty()) {
                 user.setAttributes(attributes);
@@ -218,6 +234,13 @@ public class UserServiceImpl implements UserService {
                     } catch (Exception e) {
                         System.err.println("Warning: Could not assign role '" + role + "' to user: " + e.getMessage());
                     }
+                }
+
+                try {
+                    upsertLocalUserProfile(username, email, buildFullName(firstName, lastName),
+                            resolveLocalRole(role), normalizedGender, parsedDob);
+                } catch (Exception e) {
+                    log.warn("Không thể đồng bộ user mới về DB local (email={}): {}", email, e.getMessage());
                 }
             } else if (response.getStatus() == 409) {
                 throw new RuntimeException("Người dùng với email hoặc username này đã tồn tại");
@@ -251,6 +274,7 @@ public class UserServiceImpl implements UserService {
         try {
             org.keycloak.admin.client.resource.UserResource userResource = keycloak.realm(realm).users().get(userId);
             org.keycloak.representations.idm.UserRepresentation user = userResource.toRepresentation();
+            String username = user.getUsername();
 
             user.setFirstName(firstName);
             user.setLastName(lastName);
@@ -263,15 +287,23 @@ public class UserServiceImpl implements UserService {
             } else {
                 attributes = new java.util.HashMap<>(attributes);
             }
-            if (phoneNumber != null && !phoneNumber.isBlank())
+            if (phoneNumber != null && !phoneNumber.isBlank()) {
                 attributes.put("PhoneNumber", java.util.List.of(phoneNumber));
-            if (gender != null && !gender.isBlank())
-                attributes.put("gender", java.util.List.of(gender));
-            if (dob != null && !dob.isBlank()) {
-                attributes.put("dateOfBirth", java.util.List.of(dob));
-                attributes.put("date_of_birth", java.util.List.of(dob));
-                attributes.put("date-of-birth", java.util.List.of(dob));
-                attributes.put("date_of_bird", java.util.List.of(dob));
+            }
+
+            String normalizedGender = normalizeGenderForStorage(gender);
+            if (normalizedGender != null) {
+                attributes.put("gender", java.util.List.of(normalizedGender));
+            }
+
+            LocalDate parsedDob = parseDateOfBirth(dob);
+            if (parsedDob != null) {
+                String normalizedDob = parsedDob.format(DateTimeFormatter.ISO_LOCAL_DATE);
+                attributes.put("dateOfBirth", java.util.List.of(normalizedDob));
+                attributes.put("date_of_birth", java.util.List.of(normalizedDob));
+                attributes.put("date-of-birth", java.util.List.of(normalizedDob));
+                attributes.put("date_of_bird", java.util.List.of(normalizedDob));
+                attributes.put("dob", java.util.List.of(normalizedDob));
             }
 
             user.setAttributes(attributes);
@@ -298,6 +330,13 @@ public class UserServiceImpl implements UserService {
                         .toRepresentation();
                 userResource.roles().realmLevel().add(java.util.List.of(newRole));
             }
+
+            try {
+                upsertLocalUserProfile(username, email, buildFullName(firstName, lastName),
+                        hasMeaningfulText(role) ? resolveLocalRole(role) : null, normalizedGender, parsedDob);
+            } catch (Exception e) {
+                log.warn("Không thể đồng bộ cập nhật user về DB local (email={}): {}", email, e.getMessage());
+            }
         } catch (jakarta.ws.rs.NotFoundException e) {
             throw new RuntimeException("Không tìm thấy người dùng với ID này");
         } catch (jakarta.ws.rs.WebApplicationException e) {
@@ -310,5 +349,211 @@ public class UserServiceImpl implements UserService {
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi cập nhật người dùng trong Keycloak: " + e.getMessage());
         }
+    }
+
+    private void upsertLocalUserProfile(String username, String email, String fullName, Role role, String gender,
+            LocalDate dateOfBirth) {
+        String normalizedEmail = trimToNull(email);
+        String normalizedUsername = trimToNull(username);
+        if (normalizedEmail == null && normalizedUsername == null) {
+            return;
+        }
+
+        Optional<User> existingUser = findLocalUser(normalizedEmail, normalizedUsername);
+        String providedFullName = trimToNull(fullName);
+        String fallbackFullName = firstMeaningfulText(normalizedEmail, normalizedUsername);
+        User user = existingUser.orElseGet(() -> User.builder()
+                .email(normalizedEmail != null ? normalizedEmail : normalizedUsername)
+                .username(normalizedUsername)
+                .password(null)
+                .fullName(providedFullName != null ? providedFullName : fallbackFullName)
+                .role(role == null ? Role.ROLE_USER : role)
+                .status(UserStatus.ACTIVE)
+                .build());
+
+        boolean changed = existingUser.isEmpty();
+
+        if (normalizedEmail != null && (user.getEmail() == null || !normalizedEmail.equalsIgnoreCase(user.getEmail()))) {
+            user.setEmail(normalizedEmail);
+            changed = true;
+        }
+
+        if (normalizedUsername != null && !normalizedUsername.equals(user.getUsername())) {
+            user.setUsername(normalizedUsername);
+            changed = true;
+        }
+
+        String resolvedFullName = providedFullName;
+        if (resolvedFullName == null && existingUser.isEmpty()) {
+            resolvedFullName = fallbackFullName;
+        }
+        if (resolvedFullName != null && !resolvedFullName.equals(user.getFullName())) {
+            user.setFullName(resolvedFullName);
+            changed = true;
+        }
+
+        Role resolvedRole = role != null ? role : (user.getRole() == null ? Role.ROLE_USER : user.getRole());
+        if (user.getRole() != resolvedRole) {
+            user.setRole(resolvedRole);
+            changed = true;
+        }
+
+        String normalizedGender = normalizeGenderForStorage(gender);
+        if (normalizedGender != null && !normalizedGender.equals(user.getGender())) {
+            user.setGender(normalizedGender);
+            changed = true;
+        }
+
+        if (dateOfBirth != null && !dateOfBirth.equals(user.getDateOfBirth())) {
+            user.setDateOfBirth(dateOfBirth);
+            changed = true;
+        }
+
+        if (user.getStatus() == null) {
+            user.setStatus(UserStatus.ACTIVE);
+            changed = true;
+        }
+
+        if (changed) {
+            userRepository.save(user);
+        }
+    }
+
+    private Optional<User> findLocalUser(String email, String username) {
+        if (hasMeaningfulText(email) && hasMeaningfulText(username)) {
+            return userRepository.findByEmailIgnoreCaseOrUsernameIgnoreCase(email, username);
+        }
+
+        if (hasMeaningfulText(email)) {
+            return userRepository.findByEmailIgnoreCase(email);
+        }
+
+        if (hasMeaningfulText(username)) {
+            return userRepository.findByUsernameIgnoreCase(username);
+        }
+
+        return Optional.empty();
+    }
+
+    private String extractMeaningfulAttribute(org.keycloak.representations.idm.UserRepresentation user, String... keys) {
+        if (user == null || user.getAttributes() == null) {
+            return null;
+        }
+
+        for (String key : keys) {
+            java.util.List<String> values = user.getAttributes().get(key);
+            if (values == null || values.isEmpty()) {
+                continue;
+            }
+
+            for (String value : values) {
+                if (hasMeaningfulText(value)) {
+                    return value.trim();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private Role resolveLocalRole(String role) {
+        if (!hasMeaningfulText(role)) {
+            return Role.ROLE_USER;
+        }
+
+        String normalized = normalizeComparableText(role);
+        return ("admin".equals(normalized) || "role_admin".equals(normalized)) ? Role.ROLE_ADMIN : Role.ROLE_USER;
+    }
+
+    private String buildFullName(String firstName, String lastName) {
+        String normalizedFirstName = trimToNull(firstName);
+        String normalizedLastName = trimToNull(lastName);
+
+        if (normalizedFirstName == null && normalizedLastName == null) {
+            return null;
+        }
+
+        if (normalizedFirstName == null) {
+            return normalizedLastName;
+        }
+
+        if (normalizedLastName == null) {
+            return normalizedFirstName;
+        }
+
+        return (normalizedFirstName + " " + normalizedLastName).trim();
+    }
+
+    private String firstMeaningfulText(String... values) {
+        for (String value : values) {
+            if (hasMeaningfulText(value)) {
+                return value.trim();
+            }
+        }
+
+        return null;
+    }
+
+    private LocalDate parseDateOfBirth(String value) {
+        if (!hasMeaningfulText(value)) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        for (DateTimeFormatter formatter : DATE_FORMATTERS) {
+            try {
+                return LocalDate.parse(trimmed, formatter);
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+
+        return null;
+    }
+
+    private String normalizeGenderForStorage(String gender) {
+        if (!hasMeaningfulText(gender)) {
+            return null;
+        }
+
+        String normalized = normalizeComparableText(gender);
+        return switch (normalized) {
+            case "male", "m", "nam" -> "MALE";
+            case "female", "f", "nu" -> "FEMALE";
+            case "other", "khac" -> "OTHER";
+            default -> gender.trim();
+        };
+    }
+
+    private String normalizeComparableText(String value) {
+        if (value == null) {
+            return "";
+        }
+
+        String normalized = Normalizer.normalize(value, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{M}", "").trim().toLowerCase(Locale.ROOT);
+    }
+
+    private boolean hasMeaningfulText(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+
+        String normalized = normalizeComparableText(value);
+        return !normalized.equals("n/a")
+                && !normalized.equals("na")
+                && !normalized.equals("null")
+                && !normalized.equals("unknown")
+                && !normalized.equals("none")
+                && !normalized.equals("-")
+                && !normalized.equals("chua cap nhat");
+    }
+
+    private String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }
