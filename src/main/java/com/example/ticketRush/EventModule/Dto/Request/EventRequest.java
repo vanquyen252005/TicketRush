@@ -24,7 +24,6 @@ public record EventRequest(
         String imageUrl,
 
         @NotNull(message = "Start time is required")
-        @FutureOrPresent(message = "Start time must be in the present or future")
         LocalDateTime startTime,
 
         LocalDateTime endTime,

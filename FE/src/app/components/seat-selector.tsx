@@ -119,15 +119,17 @@ export function SeatSelector({ zones, selectedSeats, onSeatsChange }: SeatSelect
                         key={seat.id}
                         onClick={() => handleSeatClick(seat)}
                         disabled={seat.status === 'BOOKED' || seat.status === 'LOCKED'}
-                        className={`w-8 h-8 rounded border-2 transition-all flex items-center justify-center text-xs ${getSeatColor(seat)}`}
+                        className={`min-w-[40px] h-10 px-1 rounded border-2 transition-all flex items-center justify-center text-xs ${getSeatColor(seat)}`}
                         title={`${row}${seat.seat_number} - ${seat.status === 'BOOKED' ? 'Đã bán' : seat.status === 'LOCKED' ? 'Đang giữ' : 'Có sẵn'}`}
                       >
                         {seat.status === 'BOOKED' ? (
-                          <X className="w-4 h-4 text-slate-600" />
+                          <span className="text-slate-500 line-through opacity-70 font-semibold">{row}{seat.seat_number}</span>
                         ) : selectedSeats.includes(seat.id) ? (
-                          <span className="text-white font-bold">✓</span>
+                          <span className="text-white font-bold">{row}{seat.seat_number}</span>
+                        ) : seat.status === 'LOCKED' ? (
+                           <span className="text-red-400 font-semibold">{row}{seat.seat_number}</span>
                         ) : (
-                          <Armchair className="w-4 h-4 text-slate-400" />
+                          <span className="text-slate-700 font-medium">{row}{seat.seat_number}</span>
                         )}
                       </button>
                     ))}

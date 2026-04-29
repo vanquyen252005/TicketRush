@@ -7,10 +7,11 @@ import { bookingService } from "../services/booking-service";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Booking } from "../types";
+import { QRCodeSVG } from "qrcode.react";
 
 export function MyTicketsPage() {
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, login, user } = useAuth();
   const location = useLocation();
   const isAdminView = location.pathname.startsWith('/admin');
   const homeLink = isAdminView ? '/admin/view-home' : '/';
@@ -36,7 +37,7 @@ export function MyTicketsPage() {
     fetchData();
   }, []);
 
-  const userBookings = bookings;
+  const userBookings = bookings.filter(b => b.status === 'CONFIRMED');
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -176,6 +177,15 @@ export function MyTicketsPage() {
                       </span>
                     </div>
 
+                    {booking.updated_at && booking.status === 'CONFIRMED' && (
+                      <div className="flex items-center justify-between pb-4 mb-4 border-b border-dashed">
+                        <span className="text-slate-600 text-sm">Thời gian đặt vé</span>
+                        <span className="text-sm font-semibold text-slate-700">
+                          {new Date(booking.updated_at).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                    )}
+
                     <button
                       onClick={() => {
                         if (isAuthenticated) {
@@ -215,33 +225,45 @@ export function MyTicketsPage() {
         )}
 
         {/* QR Code Modal */}
-        {selectedTicket && (
-          <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedTicket(null)}
-          >
-            <div
-              className="bg-white rounded-2xl max-w-md w-full p-8"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-slate-800">Mã QR vé</h3>
-                <button
-                  onClick={() => setSelectedTicket(null)}
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
+        {selectedTicket && (() => {
+          const booking = bookings.find(b => b.id === selectedTicket);
+          const event = events.find(e => e.id === booking?.event_id);
+          const qrJsonData = JSON.stringify({
+            bookingId: booking?.id,
+            user: { name: user?.full_name, phone: user?.phone_number || '' },
+            event: { name: event?.name, time: event?.startTime || event?.start_time, location: event?.location },
+            seats: booking?.items?.map((i: any) => i.seat_label).join(', ') || '',
+            status: "Đã đặt vé thành công",
+            amount: booking?.total_amount
+          });
+          const qrData = `${window.location.origin}/ticket/verify?data=${btoa(encodeURIComponent(qrJsonData))}`;
 
-              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-8 mb-6">
-                <div className="bg-white p-4 rounded-lg shadow-lg">
-                  {/* Placeholder for QR Code - In real app use a library */}
-                  <div className="w-full aspect-square bg-slate-100 rounded-lg flex items-center justify-center">
-                    <QrCode className="w-32 h-32 text-slate-400" />
+          return (
+            <div
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setSelectedTicket(null)}
+            >
+              <div
+                className="bg-white rounded-2xl max-w-md w-full p-8"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-2xl font-bold text-slate-800">Mã QR vé</h3>
+                  <button
+                    onClick={() => setSelectedTicket(null)}
+                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl p-8 mb-6">
+                  <div className="bg-white p-4 rounded-lg shadow-lg">
+                    <div className="w-full aspect-square bg-white rounded-lg flex items-center justify-center">
+                      <QRCodeSVG value={qrData} className="w-full h-full" level="M" />
+                    </div>
                   </div>
                 </div>
-              </div>
 
               <div className="text-center space-y-2">
                 <p className="text-slate-600">
@@ -252,14 +274,15 @@ export function MyTicketsPage() {
                 </p>
               </div>
 
-              <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800 text-center">
-                  ⚠️ Tăng độ sáng màn hình để máy quét dễ đọc mã
-                </p>
+                <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800 text-center">
+                    ⚠️ Tăng độ sáng màn hình để máy quét dễ đọc mã
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
 
       </div>

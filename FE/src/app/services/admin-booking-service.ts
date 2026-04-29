@@ -13,4 +13,10 @@ export const adminBookingService = {
     const response = await apiClient.get<AdminBooking>(`/api/admin/bookings/${bookingId}`);
     return response.data;
   },
+  getBookingsByEmail: async (email: string): Promise<AdminBooking[]> => {
+    const response = await apiClient.get<AdminBooking[]>("/api/admin/bookings", {
+      params: { email },
+    });
+    return response.data;
+  },
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/use-auth';
-import { User, Mail, Phone, Shield, Save } from 'lucide-react';
+import { User, Mail, Phone, Shield, Save, Key, UserCheck, Calendar } from 'lucide-react';
+import keycloak from '../keycloak';
 
 export function UserInfoPage() {
   const { user } = useAuth();
@@ -11,14 +12,25 @@ export function UserInfoPage() {
   });
   const [isHovered, setIsHovered] = useState(false);
 
+  const [keycloakProfile, setKeycloakProfile] = useState<any>(null);
+
   useEffect(() => {
-    if (user) {
-      setFormData({
-        full_name: user.full_name || '',
-        email: user.email || '',
-        phone_number: user.phone_number || '',
-      });
-    }
+    const fetchProfile = async () => {
+      try {
+        if (keycloak.authenticated) {
+          const profile = await keycloak.loadUserProfile();
+          setKeycloakProfile(profile);
+          setFormData({
+            full_name: `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || profile.username || '',
+            email: profile.email || '',
+            phone_number: profile.attributes?.phone_number?.[0] || user?.phone_number || '',
+          });
+        }
+      } catch (error) {
+        console.error("Lỗi lấy thông tin Keycloak:", error);
+      }
+    };
+    fetchProfile();
   }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -79,31 +91,17 @@ export function UserInfoPage() {
                   className="w-full px-4 py-2 rounded-xl border border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed"
                 />
               </div>
-
-              {/* Phone Number */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                  <Phone className="w-4 h-4" /> Số điện thoại
-                </label>
-                <input
-                  type="text"
-                  name="phone_number"
-                  value={formData.phone_number}
-                  onChange={handleChange}
-                  className="w-full px-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all"
-                  placeholder="Nhập số điện thoại"
-                />
-              </div>
-
-              {/* Role */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-600 flex items-center gap-2">
-                  <Shield className="w-4 h-4" /> Vai trò
-                </label>
-                <div className="w-full px-4 py-2 rounded-xl border border-slate-100 bg-slate-50 text-slate-500">
-                  {user?.role === 'ADMIN' ? 'Quản trị viên' : 'Người dùng'}
+              {/* Other Attributes */}
+              {keycloakProfile?.attributes && Object.keys(keycloakProfile.attributes).map(attr => (
+                <div className="space-y-2" key={attr}>
+                  <label className="text-sm font-medium text-slate-600 flex items-center gap-2 capitalize">
+                    <User className="w-4 h-4" /> {attr.replace('_', ' ')}
+                  </label>
+                  <div className="w-full px-4 py-2 rounded-xl border border-slate-100 bg-slate-50 text-slate-500">
+                    {keycloakProfile.attributes[attr].join(', ')}
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
 
 

@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/refresh",
+                                "/api/admin/users/export",
                                 "/api/events",
                                 "/api/events/**"
                         ).permitAll()
