@@ -6,7 +6,7 @@ export type EventStatus = 'DRAFT' | 'COMING_SOON' | 'SELLING' | 'PUBLISHED' | 'S
 export type SeatStatus = 'AVAILABLE' | 'LOCKED' | 'BOOKED';
 export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED';
 export type CheckInStatus = 'UNUSED' | 'USED' | 'REFUNDED';
-export type PaymentMethod = 'CREDIT_CARD' | 'MOMO' | 'VNPAY' | 'BANK_TRANSFER';
+export type PaymentMethod = 'CREDIT_CARD' | 'MOMO' | 'VNPAY' | 'BANK_TRANSFER' | 'INTERNAL';
 export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'REFUNDED';
 
 export interface User {
@@ -151,6 +151,21 @@ export interface AdminPaymentTransaction {
   error_message?: string;
   created_at?: string;
   updated_at?: string;
+}
+
+export interface AdminDashboardTransactionSummary {
+  total_transactions: number;
+  successful_transactions: number;
+  pending_transactions: number;
+  failed_transactions: number;
+  successful_amount: number;
+  latest_transaction_at?: string;
+}
+
+export interface AdminDashboardTransactionFeed {
+  summary: AdminDashboardTransactionSummary;
+  recent_transactions: AdminPaymentTransaction[];
+  generated_at?: string;
 }
 
 export interface AdminUserSummary {

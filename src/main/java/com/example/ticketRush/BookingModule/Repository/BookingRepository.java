@@ -76,6 +76,8 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
             """)
     List<Booking> findAllPaidDetailed();
 
+    long countByStatus(BookingStatus status);
+
     @Query("""
             select count(b)
             from Booking b

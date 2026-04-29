@@ -13,13 +13,13 @@ import com.example.ticketRush.BookingModule.Enum.BookingStatus;
 import com.example.ticketRush.BookingModule.Repository.BookingRepository;
 import com.example.ticketRush.PaymentModule.Entity.PaymentTransaction;
 import com.example.ticketRush.PaymentModule.Repository.PaymentTransactionRepository;
+import com.example.ticketRush.PaymentModule.Service.PaymentTransactionService;
 import com.example.ticketRush.EventModule.Entity.Seat;
 import com.example.ticketRush.UserModule.Entity.User;
 import com.example.ticketRush.UserModule.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,15 +32,16 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class AdminUserServiceImpl implements AdminUserService {
 
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
+    private final PaymentTransactionService paymentTransactionService;
 
     @Override
     public List<AdminUserSummaryResponse> getUsers() {
+        paymentTransactionService.syncMissingTransactionsForPaidBookings();
         List<User> users = userRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
         List<Booking> bookings = bookingRepository.findAllDetailedOrderByCreatedAtDesc();
         List<PaymentTransaction> transactions = paymentTransactionRepository.findAllDetailedOrderByCreatedAtDesc();
@@ -57,6 +58,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public AdminUserDetailResponse getUser(UUID userId) {
+        paymentTransactionService.syncMissingTransactionsForPaidBookings();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AdminUserNotFoundException(userId));
 

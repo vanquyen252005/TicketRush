@@ -16,6 +16,7 @@ export function AdminTransactionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchTransactions = async (background = false) => {
     if (background) {
@@ -27,6 +28,7 @@ export function AdminTransactionsPage() {
     try {
       const data = await adminTransactionService.getTransactions(userIdFilter);
       setTransactions(data);
+      setLastUpdated(new Date());
       setError(null);
     } catch (err) {
       console.error("Lỗi khi tải giao dịch:", err);
@@ -43,6 +45,12 @@ export function AdminTransactionsPage() {
 
   useEffect(() => {
     fetchTransactions();
+
+    const timer = window.setInterval(() => {
+      fetchTransactions(true);
+    }, 5000);
+
+    return () => window.clearInterval(timer);
   }, [userIdFilter]);
 
   const filteredTransactions = useMemo(() => {
@@ -114,7 +122,7 @@ export function AdminTransactionsPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 mb-2">Giao dịch thanh toán</h2>
-          <p className="text-slate-500">Dữ liệu lấy trực tiếp từ `payment_transactions`.</p>
+          <p className="text-slate-500">Dữ liệu lấy trực tiếp từ `payment_transactions` và tự đồng bộ lại theo chu kỳ.</p>
         </div>
         <button
           onClick={() => fetchTransactions(true)}
@@ -124,6 +132,13 @@ export function AdminTransactionsPage() {
           <span>Làm mới</span>
         </button>
       </div>
+
+      {lastUpdated && (
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-50 text-cyan-700 text-xs font-semibold">
+          <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></div>
+          Cập nhật lúc {format(lastUpdated, "HH:mm:ss dd/MM/yyyy", { locale: vi })}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">

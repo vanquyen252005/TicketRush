@@ -1,5 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  CreditCard,
   TrendingUp,
   Ticket,
   Calendar,
@@ -29,7 +34,7 @@ import {
   Cell,
 } from "recharts";
 import { adminDashboardService } from "../../services/admin-dashboard-service";
-import { DashboardStats } from "../../types";
+import { AdminDashboardTransactionFeed, DashboardStats } from "../../types";
 
 const GENDER_COLORS = ["#06b6d4", "#2563eb", "#f97316", "#94a3b8"];
 const AGE_COLORS = ["#0f172a", "#0284c7", "#22c55e", "#f59e0b", "#ef4444", "#94a3b8"];
@@ -75,6 +80,44 @@ const getMetricMeta = (metric: DashboardMetric) => {
   }
 };
 
+const getTransactionStatusMeta = (status?: string) => {
+  switch (status) {
+    case "SUCCESS":
+      return {
+        label: "Thành công",
+        className: "text-emerald-700 bg-emerald-50 border-emerald-100",
+      };
+    case "PENDING":
+      return {
+        label: "Đang chờ",
+        className: "text-amber-700 bg-amber-50 border-amber-100",
+      };
+    case "FAILED":
+      return {
+        label: "Thất bại",
+        className: "text-rose-700 bg-rose-50 border-rose-100",
+      };
+    case "REFUNDED":
+      return {
+        label: "Hoàn tiền",
+        className: "text-sky-700 bg-sky-50 border-sky-100",
+      };
+    default:
+      return {
+        label: status || "---",
+        className: "text-slate-700 bg-slate-50 border-slate-200",
+      };
+  }
+};
+
+const formatDateTime = (value?: string | null) => {
+  if (!value) {
+    return "---";
+  }
+
+  return format(new Date(value), "HH:mm:ss dd/MM/yyyy", { locale: vi });
+};
+
 export function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -82,6 +125,12 @@ export function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<DashboardMetric | null>(null);
+  const [currentTime, setCurrentTime] = useState(() => new Date());
+  const [liveTransactions, setLiveTransactions] = useState<AdminDashboardTransactionFeed | null>(null);
+  const [isLiveLoading, setIsLiveLoading] = useState(true);
+  const [isLiveRefreshing, setIsLiveRefreshing] = useState(false);
+  const [liveError, setLiveError] = useState<string | null>(null);
+  const liveFetchInFlight = useRef(false);
 
   const fetchStats = async (background = false) => {
     if (background) {
@@ -104,14 +153,54 @@ export function AdminDashboard() {
     }
   };
 
+  const fetchLiveTransactions = async (background = false) => {
+    if (liveFetchInFlight.current) {
+      return;
+    }
+
+    liveFetchInFlight.current = true;
+
+    if (background) {
+      setIsLiveRefreshing(true);
+    } else {
+      setIsLiveLoading(true);
+    }
+
+    try {
+      const data = await adminDashboardService.getLiveTransactions();
+      setLiveTransactions(data);
+      setLiveError(null);
+    } catch (err) {
+      console.error("Lỗi khi tải giao dịch realtime:", err);
+      setLiveError("Không thể tải dữ liệu giao dịch realtime từ backend.");
+    } finally {
+      liveFetchInFlight.current = false;
+      setIsLiveLoading(false);
+      setIsLiveRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     fetchStats();
+    fetchLiveTransactions();
 
-    const timer = window.setInterval(() => {
+    const clockTimer = window.setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    const dashboardTimer = window.setInterval(() => {
       fetchStats(true);
     }, 15000);
 
-    return () => window.clearInterval(timer);
+    const liveTimer = window.setInterval(() => {
+      fetchLiveTransactions(true);
+    }, 1000);
+
+    return () => {
+      window.clearInterval(clockTimer);
+      window.clearInterval(dashboardTimer);
+      window.clearInterval(liveTimer);
+    };
   }, []);
 
   const revenueSeries = stats?.revenue_data ?? [];
@@ -119,6 +208,10 @@ export function AdminDashboard() {
   const ageSeries = stats?.audience_age_data ?? [];
   const genderSeries = stats?.audience_gender_data ?? [];
   const eventPerformance = stats?.event_performance ?? [];
+  const liveSummary = liveTransactions?.summary;
+  const recentTransactions = liveTransactions?.recent_transactions ?? [];
+  const liveGeneratedAt = liveTransactions?.generated_at ? new Date(liveTransactions.generated_at) : null;
+  const liveReady = Boolean(liveTransactions);
 
   const activeEventPerformance = useMemo(
     () => eventPerformance.filter((event) => event.status === "PUBLISHED" || event.status === "SELLING"),
@@ -285,6 +378,203 @@ export function AdminDashboard() {
           color="bg-gradient-to-br from-purple-500 to-purple-600"
           onClick={() => setSelectedMetric("FILL_RATE")}
         />
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+        <div className="relative overflow-hidden rounded-3xl bg-slate-950 p-6 shadow-2xl">
+          <div className="absolute -top-20 right-0 h-56 w-56 rounded-full bg-cyan-500/20 blur-3xl" />
+          <div className="absolute -bottom-20 left-0 h-44 w-44 rounded-full bg-blue-500/20 blur-3xl" />
+          <div className="relative">
+            <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-cyan-300">
+              <Activity className="w-3.5 h-3.5" />
+              Giao dịch thời gian thực
+            </div>
+
+            <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div className="text-5xl font-black tracking-tight text-white">{format(currentTime, "HH:mm:ss", { locale: vi })}</div>
+                <div className="mt-1 text-sm text-slate-300">{format(currentTime, "EEEE, dd/MM/yyyy", { locale: vi })}</div>
+              </div>
+              <div
+                className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  isLiveRefreshing ? "bg-amber-400/15 text-amber-300" : "bg-emerald-400/15 text-emerald-300"
+                }`}
+              >
+                <span className={`h-2 w-2 rounded-full ${isLiveRefreshing ? "bg-amber-400" : "bg-emerald-400"} animate-pulse`} />
+                {isLiveRefreshing ? "Đang đồng bộ" : "Cập nhật mỗi 1s"}
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                  <CreditCard className="w-4 h-4 text-cyan-300" />
+                  Tổng giao dịch
+                </div>
+                <div className="mt-3 text-2xl font-bold text-white">
+                  {liveReady ? (liveSummary?.total_transactions ?? 0).toLocaleString("vi-VN") : "—"}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                  <CheckCircle className="w-4 h-4 text-emerald-300" />
+                  Thành công
+                </div>
+                <div className="mt-3 text-2xl font-bold text-white">
+                  {liveReady ? (liveSummary?.successful_transactions ?? 0).toLocaleString("vi-VN") : "—"}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                  <Clock className="w-4 h-4 text-amber-300" />
+                  Đang chờ
+                </div>
+                <div className="mt-3 text-2xl font-bold text-white">
+                  {liveReady ? (liveSummary?.pending_transactions ?? 0).toLocaleString("vi-VN") : "—"}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                  <AlertTriangle className="w-4 h-4 text-rose-300" />
+                  Thất bại
+                </div>
+                <div className="mt-3 text-2xl font-bold text-white">
+                  {liveReady ? (liveSummary?.failed_transactions ?? 0).toLocaleString("vi-VN") : "—"}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Doanh thu thành công</div>
+              <div className="mt-2 text-2xl font-bold text-emerald-300">
+                {liveReady ? formatCurrency(liveSummary?.successful_amount ?? 0) : "—"}
+              </div>
+              <div className="mt-1 text-xs text-slate-400">
+                Đồng hồ server: {liveGeneratedAt ? formatDateTime(liveTransactions?.generated_at) : "---"}
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center gap-2 text-xs text-slate-300">
+              <Clock className="w-4 h-4 text-cyan-300" />
+              Đồng hồ giao diện cập nhật mỗi giây, dữ liệu giao dịch tự làm mới từ backend.
+            </div>
+          </div>
+        </div>
+
+        <div className="xl:col-span-2 rounded-3xl bg-white p-6 shadow-md border border-slate-100">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-5">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-700">
+                <Activity className="w-3.5 h-3.5" />
+                Live feed
+              </div>
+              <h3 className="mt-3 text-lg font-bold text-slate-800">Giao dịch mới nhất</h3>
+              <p className="text-sm text-slate-500">Tự động refresh mỗi 1 giây từ endpoint dashboard live.</p>
+            </div>
+            <button
+              onClick={() => fetchLiveTransactions(true)}
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              {isLiveRefreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              <span>Làm mới</span>
+            </button>
+          </div>
+
+          {liveError && (
+            <div className="mb-4 rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm text-amber-800">
+              {liveError}
+            </div>
+          )}
+
+          <div className="overflow-hidden rounded-2xl border border-slate-100">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    <th className="text-left py-3 px-4 text-xs font-bold uppercase tracking-widest text-slate-500">Giao dịch</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold uppercase tracking-widest text-slate-500">Sự kiện</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold uppercase tracking-widest text-slate-500">Khách hàng</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold uppercase tracking-widest text-slate-500">Số tiền</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold uppercase tracking-widest text-slate-500">Thời gian</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold uppercase tracking-widest text-slate-500">Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {isLiveLoading && !liveTransactions ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-500">
+                        <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin text-cyan-600" />
+                        Đang tải giao dịch realtime...
+                      </td>
+                    </tr>
+                  ) : recentTransactions.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-400">
+                        Chưa có giao dịch mới.
+                      </td>
+                    </tr>
+                  ) : (
+                    recentTransactions.map((tx, index) => {
+                      const statusMeta = getTransactionStatusMeta(tx.status);
+                      const isLatest = index === 0;
+
+                      return (
+                        <tr key={tx.id} className={`transition-colors hover:bg-slate-50/70 ${isLatest ? "bg-cyan-50/50" : ""}`}>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                                <CreditCard className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <div className="text-sm font-bold tracking-tighter text-slate-800">
+                                  #{tx.id.split("-").pop()}
+                                </div>
+                                <div className="text-[11px] text-slate-400">Ref: {tx.reference_txn_id || "---"}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="space-y-1">
+                              <div className="text-sm font-semibold text-slate-700">{tx.event_name || "---"}</div>
+                              <div className="text-xs text-slate-500">Booking: {tx.booking_id?.substring(0, 8) || "---"}</div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="space-y-1">
+                              <div className="text-sm font-medium text-slate-700">{tx.user_full_name || "---"}</div>
+                              <div className="text-xs text-slate-500">{tx.user_email || "---"}</div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="text-sm font-bold text-slate-800">{formatCurrency(tx.amount)}</div>
+                            <div className="text-[11px] text-slate-400">{tx.payment_method || "---"}</div>
+                          </td>
+                          <td className="px-4 py-4 text-sm text-slate-600">{formatDateTime(tx.created_at)}</td>
+                          <td className="px-4 py-4">
+                            <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${statusMeta.className}`}>
+                              {statusMeta.label}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-cyan-600" />
+              Đồng hồ giao diện: <span className="font-mono text-slate-700">{format(currentTime, "HH:mm:ss", { locale: vi })}</span>
+            </div>
+            <div>Đồng bộ backend: {formatDateTime(liveTransactions?.generated_at ?? null)}</div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

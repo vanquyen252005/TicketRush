@@ -1,6 +1,8 @@
 package com.example.ticketRush.AdminModule.ServiceImpl;
 
 import com.example.ticketRush.AdminModule.Dto.Response.AdminDashboardResponse;
+import com.example.ticketRush.AdminModule.Dto.Response.AdminDashboardTransactionsResponse;
+import com.example.ticketRush.AdminModule.Dto.Response.AdminPaymentTransactionResponse;
 import com.example.ticketRush.AdminModule.Service.AdminDashboardService;
 import com.example.ticketRush.BookingModule.Entity.Booking;
 import com.example.ticketRush.BookingModule.Repository.BookingRepository;
@@ -8,12 +10,16 @@ import com.example.ticketRush.EventModule.Entity.Event;
 import com.example.ticketRush.EventModule.Entity.Zone;
 import com.example.ticketRush.EventModule.Enum.EventStatus;
 import com.example.ticketRush.EventModule.Repository.EventRepository;
+import com.example.ticketRush.PaymentModule.Entity.PaymentTransaction;
+import com.example.ticketRush.PaymentModule.Enum.PaymentStatus;
+import com.example.ticketRush.PaymentModule.Repository.PaymentTransactionRepository;
+import com.example.ticketRush.PaymentModule.Service.PaymentTransactionService;
 import com.example.ticketRush.UserModule.Entity.User;
 import com.example.ticketRush.UserModule.Enum.Role;
 import com.example.ticketRush.UserModule.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -33,7 +39,6 @@ import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class AdminDashboardServiceImpl implements AdminDashboardService {
 
     private static final List<String> AGE_BUCKETS = List.of("Dưới 18", "18-24", "25-34", "35-44", "45+", "Không rõ");
@@ -41,6 +46,8 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
     private final EventRepository eventRepository;
     private final BookingRepository bookingRepository;
+    private final PaymentTransactionRepository paymentTransactionRepository;
+    private final PaymentTransactionService paymentTransactionService;
     private final UserRepository userRepository;
 
     @Override
@@ -157,6 +164,38 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 eventPerformance,
                 ageData,
                 genderData,
+                LocalDateTime.now()
+        );
+    }
+
+    @Override
+    public AdminDashboardTransactionsResponse getLiveTransactions(int limit) {
+        paymentTransactionService.syncMissingTransactionsForPaidBookings();
+
+        int safeLimit = Math.min(Math.max(limit, 1), 20);
+
+        List<PaymentTransaction> recentTransactions = paymentTransactionRepository
+                .findAllByOrderByCreatedAtDesc(PageRequest.of(0, safeLimit));
+
+        List<AdminPaymentTransactionResponse> recentTransactionResponses = recentTransactions.stream()
+                .map(this::toTransactionResponse)
+                .toList();
+
+        BigDecimal successfulAmount = defaultAmount(paymentTransactionRepository.sumAmountByStatus(PaymentStatus.SUCCESS));
+
+        AdminDashboardTransactionsResponse.TransactionSummary summary =
+                new AdminDashboardTransactionsResponse.TransactionSummary(
+                        paymentTransactionRepository.count(),
+                        paymentTransactionRepository.countByStatus(PaymentStatus.SUCCESS),
+                        paymentTransactionRepository.countByStatus(PaymentStatus.PENDING),
+                        paymentTransactionRepository.countByStatusIn(List.of(PaymentStatus.FAILED, PaymentStatus.REFUNDED)),
+                        successfulAmount,
+                        recentTransactionResponses.isEmpty() ? null : recentTransactionResponses.getFirst().created_at()
+                );
+
+        return new AdminDashboardTransactionsResponse(
+                summary,
+                recentTransactionResponses,
                 LocalDateTime.now()
         );
     }
@@ -298,6 +337,27 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
     private BigDecimal defaultAmount(BigDecimal amount) {
         return amount == null ? BigDecimal.ZERO : amount;
+    }
+
+    private AdminPaymentTransactionResponse toTransactionResponse(PaymentTransaction transaction) {
+        return new AdminPaymentTransactionResponse(
+                transaction.getId(),
+                transaction.getBooking() != null ? transaction.getBooking().getId() : null,
+                transaction.getBooking() != null && transaction.getBooking().getEvent() != null ? transaction.getBooking().getEvent().getId() : null,
+                transaction.getBooking() != null && transaction.getBooking().getEvent() != null ? transaction.getBooking().getEvent().getName() : null,
+                transaction.getUser() != null ? transaction.getUser().getId() : null,
+                transaction.getUser() != null ? transaction.getUser().getFullName() : null,
+                transaction.getUser() != null ? transaction.getUser().getEmail() : null,
+                transaction.getAmount(),
+                transaction.getCurrency(),
+                transaction.getPaymentMethod() != null ? transaction.getPaymentMethod().name() : null,
+                transaction.getStatus() != null ? transaction.getStatus().name() : null,
+                transaction.getGatewayTransactionId(),
+                transaction.getReferenceTxnId(),
+                transaction.getErrorMessage(),
+                transaction.getCreatedAt(),
+                transaction.getUpdatedAt()
+        );
     }
 
     private String formatMonth(YearMonth month) {

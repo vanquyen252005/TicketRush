@@ -19,6 +19,8 @@ import com.example.ticketRush.EventModule.Enum.SeatStatus;
 import com.example.ticketRush.EventModule.Exception.EventNotFoundException;
 import com.example.ticketRush.EventModule.Repository.EventRepository;
 import com.example.ticketRush.EventModule.Repository.SeatRepository;
+import com.example.ticketRush.PaymentModule.Enum.PaymentMethod;
+import com.example.ticketRush.PaymentModule.Service.PaymentTransactionService;
 import com.example.ticketRush.UserModule.Entity.User;
 import com.example.ticketRush.UserModule.Enum.Role;
 import com.example.ticketRush.UserModule.Service.UserService;
@@ -44,6 +46,7 @@ public class BookingServiceImpl implements BookingService {
     private final EventRepository eventRepository;
     private final SeatRepository seatRepository;
     private final UserService userService;
+    private final PaymentTransactionService paymentTransactionService;
 
     @Override
     public BookingResponse holdSeats(Authentication authentication, BookingHoldRequest request) {
@@ -123,6 +126,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = loadBookingForCurrentUser(authentication, bookingId);
 
         if (booking.getStatus() == BookingStatus.PAID) {
+            paymentTransactionService.recordSuccessfulTransaction(booking, PaymentMethod.INTERNAL, null);
             return BookingMapper.toResponse(booking);
         }
 
@@ -142,7 +146,9 @@ public class BookingServiceImpl implements BookingService {
             seat.setUser(booking.getUser());
         });
 
-        return BookingMapper.toResponse(bookingRepository.save(booking));
+        bookingRepository.save(booking);
+        paymentTransactionService.recordSuccessfulTransaction(booking, PaymentMethod.INTERNAL, null);
+        return BookingMapper.toResponse(booking);
     }
 
     @Override

@@ -4,22 +4,23 @@ import com.example.ticketRush.AdminModule.Dto.Response.AdminPaymentTransactionRe
 import com.example.ticketRush.AdminModule.Service.AdminTransactionService;
 import com.example.ticketRush.PaymentModule.Entity.PaymentTransaction;
 import com.example.ticketRush.PaymentModule.Repository.PaymentTransactionRepository;
+import com.example.ticketRush.PaymentModule.Service.PaymentTransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class AdminTransactionServiceImpl implements AdminTransactionService {
 
     private final PaymentTransactionRepository paymentTransactionRepository;
+    private final PaymentTransactionService paymentTransactionService;
 
     @Override
     public List<AdminPaymentTransactionResponse> getTransactions() {
+        paymentTransactionService.syncMissingTransactionsForPaidBookings();
         return paymentTransactionRepository.findAllDetailedOrderByCreatedAtDesc()
                 .stream()
                 .map(this::toResponse)
@@ -28,6 +29,7 @@ public class AdminTransactionServiceImpl implements AdminTransactionService {
 
     @Override
     public List<AdminPaymentTransactionResponse> getTransactions(UUID userId) {
+        paymentTransactionService.syncMissingTransactionsForPaidBookings();
         return paymentTransactionRepository.findDetailedByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(this::toResponse)
